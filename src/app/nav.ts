@@ -22,7 +22,7 @@ export interface Destination {
 
 export const DESTINATIONS: Destination[] = [
   { href: '/', label: 'Play', icon: 'play' },
-  { href: '/me', label: 'Me', icon: 'me' },
   { href: '/board', label: 'Board', icon: 'board' },
+  { href: '/me', label: 'Me', icon: 'me' },
   { href: '/rewards', label: 'Rewards', icon: 'rewards' },
 ]
