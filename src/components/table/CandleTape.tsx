@@ -22,10 +22,14 @@ import { ceilingFor, floorFor } from './trace-scale'
  *   BOTH directions instead, and the sub-1.5 ceiling rungs keep a
  *   0.7x round from wasting the top half of the plot.
  *
- *   Growing x-window. Slots are sized by the candles revealed so far
- *   (floor 30 slots, capped width), so the chart grows rightward, the
- *   newest candle is always the leading edge, and long rounds compress
- *   instead of drawing off-plot.
+ *   Fixed scrolling x-window (Onety, 2026-09-05: no squashing). The
+ *   plot shows the LAST N revealed candles at a constant slot width.
+ *   Early round grows rightward from the left; once N candles have
+ *   printed, old candles scroll off the left edge and the newest one
+ *   holds the ~83% position. Slot width derives from N only, never
+ *   from the total candle count, so the chart keeps its look no
+ *   matter how long the round runs. The y-ladder hugs the VISIBLE
+ *   window, so off-screen extremes stop pinning the scale.
  *
  *   The marker. A tag riding the current price on the right edge,
  *   green when the head candle closed up, red when it closed down. It
@@ -44,6 +48,11 @@ import { ceilingFor, floorFor } from './trace-scale'
 
 const W = 1000
 const H = 100
+
+/** Fixed visible candle count. 30 fills the ~82% candle band at the
+ * slot size the earlier port used as its floor; the window scrolls
+ * left once the round prints more than this. */
+const VISIBLE_N = 30
 
 export function CandleTape({
   candles,
@@ -75,11 +84,16 @@ export function CandleTape({
   const n = candles.length
   const shown = Math.max(1, Math.min(n, revealCount ?? n))
 
-  /* The laddered band. See trace-scale.ts — do not replace this with
-   * min/max of the revealed range, that regression has already been
-   * shipped and reported twice. */
-  const top = ceilingFor(candles, shown)
-  const bottom = floorFor(candles, shown)
+  /* Fixed visible window: the last VISIBLE_N revealed candles. */
+  const start = Math.max(0, shown - VISIBLE_N)
+  const visible = candles.slice(start, shown)
+
+  /* The laddered band, computed over the VISIBLE candles only. See
+   * trace-scale.ts: do not replace this with min/max of the visible
+   * range, that regression has already been shipped and reported
+   * twice. */
+  const top = ceilingFor(visible)
+  const bottom = floorFor(visible)
   const span = top - bottom
 
   const yOf = (v: number) => ((top - v) / span) * H
@@ -87,17 +101,16 @@ export function CandleTape({
    *  SVG, so the type stays crisp instead of being scaled with it. */
   const pctOf = (v: number) => `${((top - v) / span) * 100}%`
 
-  /* x window: slots sized by candles revealed SO FAR (floor 30, capped
-   * width), so the head candle tracks as the leading edge. Candles use
-   * only ~82% of the plot: the newest candle tops out around 82-84% of
-   * the width, leaving permanent headroom on the right for the live
-   * price marker (Onety, 2026-09-05: the head must never touch the
-   * right edge). */
-  const slot = Math.min(33, (W * 0.82) / Math.max(shown, 30))
+  /* x window: constant slot width derived from VISIBLE_N, never from
+   * how many candles the round has printed. Candles use only ~82% of
+   * the plot: the newest candle tops out around 82-84% of the width,
+   * leaving permanent headroom on the right for the live price marker
+   * (Onety, 2026-09-05: the head must never touch the right edge). */
+  const slot = (W * 0.82) / VISIBLE_N
   const x0 = W * 0.02
   const bodyW = Math.max(2.5, slot * 0.7)
   const wickW = Math.max(1, slot * 0.12)
-  const head = candles[shown - 1]
+  const head = visible[visible.length - 1]
   const headUp = head ? head.closeX >= head.openX : true
   const markerX = currentX
 
@@ -131,14 +144,14 @@ export function CandleTape({
           />
         ))}
 
-        {candles.slice(0, shown).map((c, i) => {
+        {visible.map((c, i) => {
           const up = c.closeX >= c.openX
           const fill = up ? 'var(--color-up)' : 'var(--color-down)'
           const cx0 = x0 + i * slot + slot / 2
           const bodyTop = yOf(Math.max(c.openX, c.closeX))
           const bodyBottom = yOf(Math.min(c.openX, c.closeX))
           return (
-            <g key={i} opacity={called ? 0.55 : i === shown - 1 ? 1 : 0.85}>
+            <g key={start + i} opacity={called ? 0.55 : i === visible.length - 1 ? 1 : 0.85}>
               <rect
                 x={cx0 - wickW / 2}
                 y={yOf(c.highX)}
@@ -162,9 +175,9 @@ export function CandleTape({
             marker sitting at the end of it */}
         {head && !called && (
           <rect
-            x={x0 + (shown - 1) * slot + slot / 2}
+            x={x0 + (visible.length - 1) * slot + slot / 2}
             y={yOf(head.closeX)}
-            width={Math.max(0, W - (x0 + (shown - 1) * slot + slot / 2))}
+            width={Math.max(0, W - (x0 + (visible.length - 1) * slot + slot / 2))}
             height="0.3"
             fill={headUp ? 'var(--color-up)' : 'var(--color-down)'}
             opacity="0.4"
