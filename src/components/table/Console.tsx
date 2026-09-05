@@ -51,6 +51,7 @@ export function Console({
   onBuy,
   onCashOut,
   cashed,
+  variant = 'welded',
 }: {
   phase: RoundPhase
   stakeEth: number
@@ -72,6 +73,11 @@ export function Console({
   onBuy: () => void
   onCashOut: () => void
   cashed: boolean
+  /** 'welded' sits under the felt as part of the machine (phones).
+   *  'panel' is a standalone object in the right-hand rail, beside the
+   *  chart, which is where it belongs on a desktop: you can watch the
+   *  number and reach the keys without moving your eyes or scrolling. */
+  variant?: 'welded' | 'panel'
 }) {
   // This panel renders once per page today, but a console that can also
   // appear in a sheet would produce duplicate ids and silently break
@@ -87,29 +93,49 @@ export function Console({
   // or the stake outrunning your buying power.
   const canAct = !frozen && !queued && canBuy
 
-  return (
-    <div className="relative border-t-2 border-rim-hi bg-panel">
-      {/* The slot the ticket prints out of. Decorative, but it is what
-       * makes the panel read as a machine rather than as a toolbar. */}
-      <span
-        aria-hidden="true"
-        className="absolute left-1/2 top-0 h-1.5 w-28 -translate-x-1/2 -translate-y-1/2 rounded-chip bg-void shadow-[inset_0_2px_2px_rgb(0_0_0/0.9)]"
-      />
+  const panel = variant === 'panel'
 
-      {/* Two rows, at every width.
-       *
-       * The first attempt put stake, leverage and the action keys in one
-       * row from lg up. The middle column of the table grid is about
-       * 890px at 1512, which left the leverage group barely 100px wide:
-       * every key collapsed and its label spilled out across the panel.
-       * Nothing errored and the source read fine — it took a screenshot.
-       *
-       * Two rows also puts the LONG and SHORT keys across the full width
-       * of the machine, which is where the primary action belongs. */}
-      <div className="flex flex-col gap-3 p-3 sm:p-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
+  return (
+    <div
+      className={cx(
+        'relative',
+        panel
+          ? 'overflow-hidden rounded-panel border border-gold-deep/40 bg-panel shadow-lift'
+          : 'border-t-2 border-rim-hi bg-panel',
+      )}
+    >
+      {panel ? (
+        <>
+          {/* In the rail the console is its own object, so it gets the
+           * table's gold edge along the top instead of a slot. */}
+          <span aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-gold/60" />
+          <header className="flex min-h-[44px] items-center gap-2 border-b border-rim px-4">
+            <span className="eyebrow text-gold">Your bet</span>
+          </header>
+        </>
+      ) : (
+        /* Welded under the felt: the slot the ticket prints out of.
+         * Decorative, but it is what makes the panel read as a machine
+         * rather than as a toolbar. */
+        <span
+          aria-hidden="true"
+          className="absolute top-0 left-1/2 h-1.5 w-28 -translate-x-1/2 -translate-y-1/2 rounded-chip bg-void shadow-[inset_0_2px_2px_rgb(0_0_0/0.9)]"
+        />
+      )}
+
+      {/* The layout below responds to the CONSOLE's own width, not the
+       * viewport's — it is a full-width bar under the chart on a phone
+       * and a 292px column beside the chart on desktop, and a media
+       * query cannot tell those apart. */}
+      <div className="@container flex flex-col gap-3 p-3 sm:p-4">
+        {/* Container query, not a viewport one. At 1024 the machine
+         * column is only ~400px wide even though the VIEWPORT is wide,
+         * so a `sm:flex-row` here crushed the auto-sell keys into an
+         * unreadable 40px column. The console has to respond to its own
+         * width, which is the one thing a media query cannot see. */}
+        <div className="flex flex-col gap-4 @min-[600px]:flex-row @min-[600px]:gap-6">
         {/* ---- stake ------------------------------------------------ */}
-        <div className="min-w-0 sm:w-[286px] sm:shrink-0">
+        <div className="min-w-0 @min-[600px]:w-[286px] @min-[600px]:shrink-0">
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="eyebrow text-ink-3">Stake</span>
             <div className="flex items-center gap-2">
@@ -230,7 +256,7 @@ export function Console({
               </span>
             </Key>
           ) : (
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 gap-2.5 @min-[380px]:grid-cols-2">
               <Key variant="long" size="xl" disabled={!canAct} onClick={onBuy}>
                 <span className="flex flex-col items-center leading-none">
                   <span className="flex items-center gap-1.5 text-base">

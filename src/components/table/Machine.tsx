@@ -5,8 +5,11 @@ import { cx } from '../../lib/cx'
 /* ------------------------------------------------------------------ *
  * The rim.
  *
- * The felt and the console are one object, not two panels stacked, so
- * the brushed-metal edge and the shadow live out here and wrap both.
+ * The brushed-metal edge and the shadow live out here and wrap whatever
+ * the table is made of at this width — on a phone that is the felt and
+ * the console welded together, on desktop it is the felt alone, because
+ * the console moves to the right rail beside the chart.
+ *
  * The shake is keyed on the phase, which means it fires once when the
  * house takes the round rather than replaying on every value tick.
  * ------------------------------------------------------------------ */

@@ -15,11 +15,11 @@ import { HowItWorks } from '../components/table/HowItWorks'
  * The table.
  *
  * Layout, top to bottom: the results strip, then one grid whose middle
- * column is the machine — felt and console as a single moulded object —
- * with the other players down the left and what is coming next down the
- * right. Below lg the same three regions become one stack in the order
- * that matters on a phone: play, then who else is here, then what is
- * next, then the feed.
+ * column is the table itself —
+ * with the other players down the left and the betting console down the
+ * right, beside the chart. Below lg the same three columns become one
+ * stack in the order that matters on a phone: play, your slip, what is
+ * next, who else is here, the feed.
  *
  * Everything on this page that changes over time comes out of useReel,
  * which subscribes to the round engine (src/lib/engine.ts): a seeded
@@ -100,6 +100,29 @@ export function Play() {
     <Ticket position={position} payoutX={ticketPayoutX} pnlEth={ticketPnlEth} stamp={stamp} />
   ) : null
 
+  /* Console props, built once: the page renders the console twice (the
+   * welded copy on phones, the panel copy in the rail from lg), and
+   * both copies MUST read the same values so they can never disagree. */
+  const consoleProps = {
+    phase: reel.phase,
+    stakeEth,
+    onStake: setStakeEth,
+    autoSell,
+    onAutoSell: setAutoSell,
+    autoSellAtX,
+    onAutoSellAtX: setAutoSellAtX,
+    sound,
+    onSound: setSound,
+    holding: you.status === 'in',
+    queued: you.status === 'queued',
+    payoutX: reel.payoutX,
+    pnlEth: reel.pnlEth,
+    cashed,
+    canBuy: stakeEth <= reel.session.buyingPowerEth,
+    onBuy: () => reel.buy(stakeEth),
+    onCashOut: () => reel.sell(),
+  }
+
   /* Your seat is built here rather than living in the roster, so the
    * rail can never claim you are holding while the console says flat. */
   const yourSeat: Player | null = position
@@ -124,13 +147,38 @@ export function Play() {
 
         {/* grid-cols-1 is load-bearing: without an explicit base column
          * the children land in an implicit max-content track and the
-         * scroll rails inside them blow the page out sideways. */}
+         * scroll rails inside them blow the page out sideways.
+         *
+         * THREE COLUMNS, EACH ITS OWN STACK — no grid rows.
+         *
+         *   [ your slip  ] [ the table  ] [ your bet   ]
+         *   [ at the table] [ up next   ] [ live feed  ]
+         *
+         * The betting console takes the right-hand rail so the chart and
+         * the LONG / SHORT keys sit SIDE BY SIDE — you watch the number
+         * and reach the keys without moving your eyes or scrolling, at
+         * any window height. "Up next" moves under the chart, because
+         * knowing which ticker is coming matters far less than being
+         * able to act on the one that is running.
+         *
+         * Deliberately NOT placed on explicit grid rows. With rows, a
+         * tall item in one column stretches the row and punches dead
+         * space into the other two — which is exactly what happened when
+         * the printed ticket sat loose in the middle column: it made
+         * that column 715px against 440 everywhere else and threw the
+         * whole page out of alignment. Independent column stacks cannot
+         * do that to each other. */}
         <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[262px_minmax(0,1fr)_292px]">
-          <div className="order-2 min-w-0 lg:order-none">
+          <div className="order-2 flex min-w-0 flex-col gap-4 lg:order-none">
+            {/* Between lg and xl the felt is too narrow to carry the
+             * ticket beside the chart, so the paper heads this rail
+             * instead — flush in a 262px column with the seats below it,
+             * rather than floating centred in open page. */}
+            {ticket && <div className="hidden lg:block xl:hidden">{ticket}</div>}
             <PlayersRail players={reel.players} watching={reel.watching} you={yourSeat} />
           </div>
 
-          <div className="order-1 min-w-0 lg:order-none">
+          <div className="order-1 flex min-w-0 flex-col gap-4 lg:order-none">
             <Machine phase={reel.phase}>
               <Felt
                 round={round}
@@ -141,36 +189,33 @@ export function Play() {
                 payoutX={you.status === 'in' ? reel.payoutX : null}
                 ticket={ticket}
               />
-              <Console
-                phase={reel.phase}
-                stakeEth={stakeEth}
-                onStake={setStakeEth}
-                autoSell={autoSell}
-                onAutoSell={setAutoSell}
-                autoSellAtX={autoSellAtX}
-                onAutoSellAtX={setAutoSellAtX}
-                sound={sound}
-                onSound={setSound}
-                holding={you.status === 'in'}
-                queued={you.status === 'queued'}
-                payoutX={reel.payoutX}
-                pnlEth={reel.pnlEth}
-                cashed={cashed}
-                canBuy={stakeEth <= reel.session.buyingPowerEth}
-                onBuy={() => reel.buy(stakeEth)}
-                onCashOut={() => reel.sell()}
-              />
+              {/* Welded under the felt on a phone, where a right-hand
+               * rail does not exist and the thumb is at the bottom. */}
+              <div className="lg:hidden">
+                <Console {...consoleProps} />
+              </div>
             </Machine>
 
-            {/* Below xl there is no room on the felt for the ticket, so
-             * it sits directly under the slot it came out of. */}
-            {ticket && (
-              <div className="mt-4 flex justify-center xl:hidden">{ticket}</div>
-            )}
+            {/* On a phone the console is welded above, so the paper
+             * really is coming out of that slot. Centred here is right
+             * because the whole page is one centred column. */}
+            {ticket && <div className="flex justify-center lg:hidden">{ticket}</div>}
+
+            <QueueRail round={round} phase={reel.phase} queue={reel.queue} />
           </div>
 
+          {/* The console, in the rail, beside the chart. Rendered twice
+           * rather than moved: a DOM node cannot be in two grid columns,
+           * and both copies read the same props from this page, so they
+           * cannot disagree. Console calls useId(), so the two auto-sell
+           * checkboxes get distinct ids and neither <label for> breaks. */}
           <div className="order-3 flex min-w-0 flex-col gap-4 lg:order-none">
-            <QueueRail round={round} phase={reel.phase} queue={reel.queue} />
+            {/* The panel copy only exists from lg; below that the welded
+             * one inside the machine is the real console. The feed under
+             * it stays visible at every width. */}
+            <div className="hidden lg:block">
+              <Console variant="panel" {...consoleProps} />
+            </div>
             <FeedRail items={reel.feed} />
           </div>
         </div>

@@ -30,7 +30,14 @@ export function useRevealOnce<T extends HTMLElement>() {
           io.disconnect()
         }
       },
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.15 },
+      /* Fire when the watched element itself is entering the viewport,
+       * not when it is merely approaching. The first version used a
+       * -12% bottom margin and a 0.15 threshold against the whole
+       * section, which meant the reveal ran while the cards were still
+       * below the fold — the animation was perfect and nobody ever saw
+       * it. Put the ref on the thing that MOVES, and trigger the moment
+       * its top edge clears the bottom of the screen. */
+      { rootMargin: '0px 0px -60px 0px', threshold: 0.01 },
     )
     io.observe(el)
     return () => io.disconnect()

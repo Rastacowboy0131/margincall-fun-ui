@@ -66,7 +66,14 @@ export function Panel({
           {action}
         </header>
       )}
-      <div className={cx('relative', bodyClassName ?? 'p-4')}>{children}</div>
+      <div
+        className={cx(
+          'relative',
+            bodyClassName ?? 'p-4',
+        )}
+      >
+        {children}
+      </div>
     </section>
   )
 }

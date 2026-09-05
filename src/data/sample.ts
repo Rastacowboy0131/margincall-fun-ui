@@ -215,6 +215,12 @@ export const ACTIVITY: Activity[] = [
   { id: 'a8', timeLabel: '00:56:55', handle: 'dianafan', tint: '#2563eb', action: 'sold', atX: 2.09, entryX: 0.92, pnlEth: 0.67, ticker: 'NVDAx' },
 ]
 
+/* The schedule board: five queued rounds plus the live one, six cards.
+ * Six is the number that fills the space under the chart and no more —
+ * it divides evenly into the board's 2 and 3 column layouts, so the
+ * last row is never left ragged. Rounds open every 25 seconds, so this
+ * is about two minutes of visible schedule, which is as far ahead as
+ * anyone plans in a game with 15-second rounds. */
 export const QUEUE: QueuedRound[] = [
   { ticker: TICKERS.AAPLx, leverage: 5, startsInLabel: '00:25' },
   { ticker: TICKERS.GMEx, leverage: 5, startsInLabel: '00:50' },

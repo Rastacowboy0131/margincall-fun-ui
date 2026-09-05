@@ -44,9 +44,15 @@ export function ResultsStrip({
            * entire tension of the game, so it is drawn as an outline
            * rather than a filled pill. */}
           <li className="shrink-0">
+            {/* Keyed on the phase so the pill re-mounts and slides in
+             * each time the round changes state. The strip is the one
+             * thing on this page a player checks between rounds; it had
+             * no reaction at all when a round settled, which made the
+             * most-read element on the page the deadest one. */}
             <span
+              key={phase}
               className={cx(
-                'nums flex h-8 items-center gap-1.5 rounded-tag border-2 px-2.5 text-xs font-extrabold',
+                'anim-slot nums flex h-8 items-center gap-1.5 rounded-tag border-2 px-2.5 text-xs font-extrabold',
                 phase === 'called'
                   ? 'border-down bg-down-wash text-down'
                   : 'border-gold bg-transparent text-gold',
