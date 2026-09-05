@@ -88,8 +88,12 @@ export function CandleTape({
   const pctOf = (v: number) => `${((top - v) / span) * 100}%`
 
   /* x window: slots sized by candles revealed SO FAR (floor 30, capped
-   * width), so the head candle tracks as the leading edge. */
-  const slot = Math.min(33, (W * 0.94) / Math.max(shown, 30))
+   * width), so the head candle tracks as the leading edge. Candles use
+   * only ~82% of the plot: the newest candle tops out around 82-84% of
+   * the width, leaving permanent headroom on the right for the live
+   * price marker (Onety, 2026-09-05: the head must never touch the
+   * right edge). */
+  const slot = Math.min(33, (W * 0.82) / Math.max(shown, 30))
   const x0 = W * 0.02
   const bodyW = Math.max(2.5, slot * 0.7)
   const wickW = Math.max(1, slot * 0.12)
