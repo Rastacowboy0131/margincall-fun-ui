@@ -1,4 +1,4 @@
-import { RESULTS } from '../../data/sample'
+import type { Result } from '../../data/types'
 import { BAND_LABEL, bandOf, x, type ResultBand } from '../../lib/format'
 import { cx } from '../../lib/cx'
 
@@ -24,7 +24,16 @@ const BAND: Record<ResultBand, string> = {
   monster: 'border-live-deep/55 bg-live-wash text-live',
 }
 
-export function ResultsStrip({ liveX, phase }: { liveX: number; phase: string }) {
+export function ResultsStrip({
+  liveX,
+  phase,
+  results,
+}: {
+  liveX: number
+  phase: string
+  /** Settled rounds, newest first, from the engine. */
+  results: Result[]
+}) {
   return (
     <div className="border-b border-rim bg-void/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-[1560px] items-center gap-3 px-3 sm:px-5">
@@ -56,7 +65,7 @@ export function ResultsStrip({ liveX, phase }: { liveX: number; phase: string })
 
           <li aria-hidden="true" className="h-5 w-px shrink-0 bg-rim" />
 
-          {RESULTS.map((r) => {
+          {results.map((r) => {
             const band = bandOf(r.ruggedAtX)
             return (
               <li key={r.roundId} className="shrink-0">

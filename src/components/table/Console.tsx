@@ -44,8 +44,11 @@ export function Console({
   sound,
   onSound,
   holding,
+  queued,
   payoutX,
   pnlEth,
+  canBuy,
+  onBuy,
   onCashOut,
   cashed,
 }: {
@@ -60,8 +63,13 @@ export function Console({
   onSound: (v: boolean) => void
   /** True while the viewer has an open position in this round. */
   holding: boolean
+  /** True while a buy is queued for the next 1.00x open. */
+  queued: boolean
   payoutX: number | null
   pnlEth: number | null
+  /** False when the stake exceeds buying power. */
+  canBuy: boolean
+  onBuy: () => void
   onCashOut: () => void
   cashed: boolean
 }) {
@@ -75,8 +83,9 @@ export function Console({
   const frozen = phase === 'called'
   // Selling does not lock you out of the round — the whole pitch is that
   // you can buy the dip, sell the rip and buy back in. The only thing
-  // that stops you acting is the round being over.
-  const canAct = !frozen
+  // that stops you acting is the round being over, a buy already queued,
+  // or the stake outrunning your buying power.
+  const canAct = !frozen && !queued && canBuy
 
   return (
     <div className="relative border-t-2 border-rim-hi bg-panel">
@@ -222,25 +231,25 @@ export function Console({
             </Key>
           ) : (
             <div className="grid grid-cols-2 gap-2.5">
-              <Key variant="long" size="xl" disabled={!canAct}>
+              <Key variant="long" size="xl" disabled={!canAct} onClick={onBuy}>
                 <span className="flex flex-col items-center leading-none">
                   <span className="flex items-center gap-1.5 text-base">
                     <Icon name="up" size={16} strokeWidth={3} />
-                    {queueing ? 'QUEUE LONG' : 'LONG'}
+                    {queued ? 'QUEUED' : queueing ? 'QUEUE LONG' : 'LONG'}
                   </span>
                   <span className="mt-1 text-[10px] font-bold opacity-75">
-                    price goes up
+                    {queued ? 'fills at the 1.00x open' : 'price goes up'}
                   </span>
                 </span>
               </Key>
-              <Key variant="short" size="xl" disabled={!canAct}>
+              <Key variant="short" size="xl" disabled>
                 <span className="flex flex-col items-center leading-none">
                   <span className="flex items-center gap-1.5 text-base">
                     <Icon name="down" size={16} strokeWidth={3} />
-                    {queueing ? 'QUEUE SHORT' : 'SHORT'}
+                    SHORT
                   </span>
                   <span className="mt-1 text-[10px] font-bold opacity-75">
-                    price goes down
+                    coming soon
                   </span>
                 </span>
               </Key>
@@ -257,7 +266,11 @@ export function Console({
                 ? 'Out with your profit. Buy back in any time — the round is still running.'
                 : holding
                   ? 'Sell any time. Holding at the call loses the position.'
-                  : 'Buy any time mid-round — your entry becomes your 1.00x.'}
+                  : queued
+                    ? 'Your buy is in the queue. It fills the moment the round opens.'
+                    : !canBuy
+                      ? 'Stake is more than your buying power. Pick a smaller chip.'
+                      : 'Buy any time mid-round — your entry becomes your 1.00x.'}
           </p>
         </div>
       </div>
