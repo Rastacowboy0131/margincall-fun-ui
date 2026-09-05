@@ -1,6 +1,7 @@
 import { AppLink } from '../app/AppLink'
-import type { Position } from '../data/types'
-import { CHAIN, HISTORY, POSITION, SESSION } from '../data/sample'
+import type { HistoryRow, Position } from '../data/types'
+import { CHAIN } from '../data/sample'
+import { useReel } from '../lib/useReel'
 import { eth, signedEth, x } from '../lib/format'
 import { PageHead } from '../components/shell/PageHead'
 import { Panel } from '../components/ui/Panel'
@@ -22,7 +23,7 @@ import { cx } from '../lib/cx'
  * becomes a stacked card carrying the same seven values.
  * ------------------------------------------------------------------ */
 
-function Outcome({ row }: { row: (typeof HISTORY)[number] }) {
+function Outcome({ row }: { row: HistoryRow }) {
   return row.outcome === 'called' ? (
     <Tag tone="down">liquidated</Tag>
   ) : row.pnlEth >= 0 ? (
@@ -33,11 +34,25 @@ function Outcome({ row }: { row: (typeof HISTORY)[number] }) {
 }
 
 export function Me() {
-  /* Typed as nullable on purpose. The sample file always hands over an
-   * open position, but the empty branch below is a designed state and
-   * has to compile — when Nora wires this up, `null` is what a flat
-   * player gets and it must not fall through to a broken layout. */
-  const open: Position | null = POSITION
+  const reel = useReel()
+  const { you, session, history: HISTORY } = reel
+
+  /* The open position, live from the engine. Null when flat — the empty
+   * branch below is a designed state, not a fallback. */
+  const open: Position | null =
+    you.status === 'in' && you.entryX !== null
+      ? {
+          ticker: reel.ticker,
+          leverage: reel.leverage,
+          side: 'long',
+          stakeEth: you.stakeEth,
+          entryX: you.entryX,
+          payoutX: reel.payoutX ?? 1,
+          pnlEth: reel.pnlEth ?? 0,
+          roundId: reel.roundId,
+          openedAtLabel: you.openedAtLabel,
+        }
+      : null
 
   return (
     <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:py-12">
@@ -53,7 +68,7 @@ export function Me() {
         aside={
           <div className="flex items-center gap-2">
             <Tag tone="gold">Paper trading</Tag>
-            <Tag tone="live">{SESSION.streakDays}-day streak</Tag>
+            <Tag tone="live">{session.streakDays}-day streak</Tag>
           </div>
         }
       />
@@ -117,12 +132,12 @@ export function Me() {
         <Panel title="Paper balance" bodyClassName="p-0">
           <dl className="divide-y divide-rim">
             {[
-              ['Buying power', `${eth(SESSION.buyingPowerEth)} ETH`, 'text-ink'],
-              ['At risk (open position)', `${eth(SESSION.atRiskEth)} ETH`, 'text-ink'],
+              ['Buying power', `${eth(session.buyingPowerEth)} ETH`, 'text-ink'],
+              ['At risk (open position)', `${eth(session.atRiskEth)} ETH`, 'text-ink'],
               [
                 'Session net P&L',
-                `${signedEth(SESSION.netPnlEth, 4)} ETH`,
-                SESSION.netPnlEth < 0 ? 'text-down' : 'text-up',
+                `${signedEth(session.netPnlEth, 4)} ETH`,
+                session.netPnlEth < 0 ? 'text-down' : 'text-up',
               ],
             ].map(([label, value, tone]) => (
               <div key={label} className="flex items-baseline justify-between gap-3 px-4 py-3">
@@ -133,7 +148,7 @@ export function Me() {
             <div className="flex items-baseline justify-between gap-3 bg-void px-4 py-4">
               <dt className="text-sm font-bold">Account value</dt>
               <dd className="nums text-xl font-extrabold text-gold">
-                {eth(SESSION.accountValueEth, 4)} ETH
+                {eth(session.accountValueEth, 4)} ETH
               </dd>
             </div>
           </dl>
@@ -145,27 +160,27 @@ export function Me() {
         <div className="grid grid-cols-2 divide-x divide-y divide-rim sm:grid-cols-3 lg:grid-cols-5">
           <Stat
             label="Net P&L"
-            value={`${signedEth(SESSION.netPnlEth)}`}
+            value={`${signedEth(session.netPnlEth)}`}
             note="ETH · the house is patient"
-            tone={SESSION.netPnlEth < 0 ? 'down' : 'up'}
+            tone={session.netPnlEth < 0 ? 'down' : 'up'}
             hero
           />
-          <Stat label="Rounds played" value={SESSION.roundsPlayed} note="positions opened" />
+          <Stat label="Rounds played" value={session.roundsPlayed} note="positions opened" />
           <Stat
             label="Win rate"
-            value={SESSION.winRatePct === null ? '—' : `${SESSION.winRatePct.toFixed(1)}%`}
+            value={session.winRatePct === null ? '—' : `${session.winRatePct.toFixed(1)}%`}
             note="sold above your entry"
           />
           <Stat
             label="Best exit"
-            value={SESSION.bestExitX === null ? '—' : x(SESSION.bestExitX)}
-            note="GMEx, round #4412"
+            value={session.bestExitX === null ? '—' : x(session.bestExitX)}
+            note="your best payout multiple"
             tone="up"
           />
           <Stat
             label="Worst liquidation"
-            value={SESSION.worstCalledAtX === null ? '—' : x(SESSION.worstCalledAtX)}
-            note="AAPLx, round #4413"
+            value={session.worstCalledAtX === null ? '—' : x(session.worstCalledAtX)}
+            note="lowest rug you held into"
             tone="down"
           />
         </div>

@@ -24,6 +24,7 @@ export function Felt({
   round,
   phase,
   candles,
+  revealCount,
   position,
   payoutX,
   ticket,
@@ -31,6 +32,8 @@ export function Felt({
   round: Round
   phase: RoundPhase
   candles: Candle[]
+  /** How many candles of the path have happened yet. */
+  revealCount?: number
   /** The viewer's position, for the entry line on the chart. */
   position: Position | null
   payoutX: number | null
@@ -119,6 +122,7 @@ export function Felt({
         >
           <CandleTape
             candles={candles}
+            revealCount={revealCount}
             entryX={position ? position.entryX : null}
             currentX={round.currentX}
             called={called}

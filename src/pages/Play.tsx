@@ -1,16 +1,5 @@
-import { useState } from 'react'
-import type { Player, Round } from '../data/types'
-import {
-  ACTIVITY,
-  CANDLES,
-  CANDLES_CALLED,
-  PLAYERS,
-  PLAYERS_BETWEEN,
-  PLAYERS_CALLED,
-  POSITION,
-  QUEUE,
-  ROUND,
-} from '../data/sample'
+import { useEffect, useState } from 'react'
+import type { Player, Position, Round } from '../data/types'
 import { useReel } from '../lib/useReel'
 import { ResultsStrip } from '../components/shell/ResultsStrip'
 import { Machine } from '../components/table/Machine'
@@ -33,85 +22,105 @@ import { HowItWorks } from '../components/table/HowItWorks'
  * next, who else is here, the feed.
  *
  * Everything on this page that changes over time comes out of useReel,
- * which walks a fixed list of frames. All the state declared here is
- * presentational: which chip is lifted, where auto-sell is set,
- * whether the sound icon is crossed out, and whether the ticket has
- * been stamped. None of it computes a figure anyone cares about.
+ * which subscribes to the round engine (src/lib/engine.ts): a seeded
+ * random walk per round, looping live -> called -> intermission
+ * forever. The state declared here is presentational — which chip is
+ * lifted, where auto-sell is set, whether the sound icon is crossed
+ * out. The money is the engine's.
  * ------------------------------------------------------------------ */
 
 export function Play() {
-  const frame = useReel()
+  const reel = useReel()
 
   const [stakeEth, setStakeEth] = useState(0.5)
   const [autoSell, setAutoSell] = useState(false)
   const [autoSellAtX, setAutoSellAtX] = useState(2)
   const [sound, setSound] = useState(true)
 
-  /* Pressing SELL stamps the ticket CASHED and freezes the figures that
-   * were on it at that moment, so the paper and the reel can never
-   * disagree about what you walked away with. Cleared when the table
-   * resets. */
-  const [cashedAt, setCashedAt] = useState<{ atX: number; payoutX: number; pnlEth: number } | null>(
-    null,
-  )
+  const { you } = reel
 
-  /* Adjusted during render rather than from an effect. React documents
-   * this for "reset some state when a value changes", and it matters
-   * here: an effect would let one frame paint with a CASHED ticket on a
-   * table that has already reset. */
-  const [phaseSeen, setPhaseSeen] = useState(frame.phase)
-  if (phaseSeen !== frame.phase) {
-    setPhaseSeen(frame.phase)
-    if (frame.phase === 'intermission') setCashedAt(null)
-  }
+  /* Auto-sell: fires the same sell the button does, once, the first
+   * tick the payout multiple touches the target. */
+  useEffect(() => {
+    if (!autoSell) return
+    if (reel.phase !== 'live' || you.status !== 'in') return
+    if (reel.payoutX !== null && reel.payoutX >= autoSellAtX) reel.sell()
+  }, [autoSell, autoSellAtX, reel, you.status])
 
   const round: Round = {
-    ...ROUND,
-    phase: frame.phase,
-    currentX: frame.currentX,
-    elapsedSec: frame.elapsedSec,
-    opensInSec: frame.opensInSec,
-    ruggedAtX: frame.phase === 'called' ? frame.currentX : null,
-    holding: frame.holding,
-    watching: frame.watching,
+    id: reel.roundId,
+    ticker: reel.ticker,
+    leverage: reel.leverage,
+    phase: reel.phase,
+    currentX: reel.currentX,
+    elapsedSec: reel.elapsedSec,
+    ruggedAtX: reel.ruggedAtX,
+    opensInSec: reel.opensInSec,
+    holding: reel.holding,
+    watching: reel.watching,
   }
 
-  const path = frame.phase === 'called' ? CANDLES_CALLED : CANDLES
-  const candles = path.slice(0, frame.candles)
+  /* Your position, assembled from the engine's `you`. Sold and called
+   * positions keep their ticket on the felt until the table resets, so
+   * the stamp lands on the paper that was there. */
+  const hasTicket = you.status === 'in' || you.status === 'out' || you.status === 'called'
+  const cashed = you.status === 'out'
+  const dead = you.status === 'called'
 
-  const inRound = frame.phase !== 'intermission'
-  const position = inRound ? POSITION : null
-  const stillHolding = inRound && cashedAt === null
+  const soldPayoutX =
+    cashed && you.exitX !== null && you.entryX !== null
+      ? Math.min(25, you.exitX / you.entryX)
+      : null
+  const ticketPayoutX = cashed ? soldPayoutX : dead ? null : reel.payoutX
+  const ticketPnlEth = cashed
+    ? soldPayoutX !== null
+      ? you.stakeEth * (soldPayoutX - 1)
+      : null
+    : dead
+      ? -you.stakeEth
+      : reel.pnlEth
 
-  const ticketPayoutX = cashedAt ? cashedAt.payoutX : frame.payoutX
-  const ticketPnlEth = cashedAt ? cashedAt.pnlEth : frame.pnlEth
-  const stamp: TicketStamp = cashedAt
-    ? 'cashed'
-    : frame.phase === 'called'
-      ? 'liquidated'
-      : 'none'
+  const position: Position | null = hasTicket
+    ? {
+        ticker: reel.ticker,
+        leverage: reel.leverage,
+        side: 'long',
+        stakeEth: you.stakeEth,
+        entryX: you.entryX ?? 1,
+        payoutX: ticketPayoutX ?? 1,
+        pnlEth: ticketPnlEth ?? 0,
+        roundId: reel.roundId,
+        openedAtLabel: you.openedAtLabel,
+      }
+    : null
+
+  const stamp: TicketStamp = cashed ? 'cashed' : dead ? 'liquidated' : 'none'
 
   const ticket = position ? (
-    <Ticket
-      position={position}
-      payoutX={ticketPayoutX}
-      pnlEth={ticketPnlEth}
-      stamp={stamp}
-    />
+    <Ticket position={position} payoutX={ticketPayoutX} pnlEth={ticketPnlEth} stamp={stamp} />
   ) : null
 
-  const roster =
-    frame.phase === 'called'
-      ? PLAYERS_CALLED
-      : frame.phase === 'intermission'
-        ? PLAYERS_BETWEEN
-        : PLAYERS
-
-  /* Shared by both console copies so they can never diverge. */
-  const cashOut = () => {
-    if (frame.payoutX !== null && frame.pnlEth !== null) {
-      setCashedAt({ atX: frame.currentX, payoutX: frame.payoutX, pnlEth: frame.pnlEth })
-    }
+  /* Console props, built once: the page renders the console twice (the
+   * welded copy on phones, the panel copy in the rail from lg), and
+   * both copies MUST read the same values so they can never disagree. */
+  const consoleProps = {
+    phase: reel.phase,
+    stakeEth,
+    onStake: setStakeEth,
+    autoSell,
+    onAutoSell: setAutoSell,
+    autoSellAtX,
+    onAutoSellAtX: setAutoSellAtX,
+    sound,
+    onSound: setSound,
+    holding: you.status === 'in',
+    queued: you.status === 'queued',
+    payoutX: reel.payoutX,
+    pnlEth: reel.pnlEth,
+    cashed,
+    canBuy: stakeEth <= reel.session.buyingPowerEth,
+    onBuy: () => reel.buy(stakeEth),
+    onCashOut: () => reel.sell(),
   }
 
   /* Your seat is built here rather than living in the roster, so the
@@ -121,16 +130,16 @@ export function Play() {
         handle: 'you',
         tint: '#ffc247',
         entryX: position.entryX,
-        atX: cashedAt ? cashedAt.atX : frame.currentX,
+        atX: cashed ? (you.exitX ?? reel.currentX) : reel.currentX,
         pnlEth: ticketPnlEth ?? 0,
-        status: cashedAt ? 'out' : frame.phase === 'called' ? 'called' : 'holding',
+        status: cashed ? 'out' : dead ? 'called' : 'holding',
       }
     : null
 
   return (
     <>
       <div className="sticky top-14 z-30">
-        <ResultsStrip liveX={frame.currentX} phase={frame.phase} />
+        <ResultsStrip liveX={reel.currentX} phase={reel.phase} results={reel.results} />
       </div>
 
       <div className="mx-auto max-w-[1560px] px-3 py-3 sm:px-5 lg:py-5">
@@ -166,38 +175,24 @@ export function Play() {
              * instead — flush in a 262px column with the seats below it,
              * rather than floating centred in open page. */}
             {ticket && <div className="hidden lg:block xl:hidden">{ticket}</div>}
-            <PlayersRail players={roster} watching={frame.watching} you={yourSeat} />
+            <PlayersRail players={reel.players} watching={reel.watching} you={yourSeat} />
           </div>
 
           <div className="order-1 flex min-w-0 flex-col gap-4 lg:order-none">
-            <Machine phase={frame.phase}>
+            <Machine phase={reel.phase}>
               <Felt
                 round={round}
-                phase={frame.phase}
-                candles={candles}
-                position={position}
-                payoutX={stillHolding ? frame.payoutX : null}
+                phase={reel.phase}
+                candles={reel.candles}
+                revealCount={reel.revealCount}
+                position={you.status === 'in' ? position : null}
+                payoutX={you.status === 'in' ? reel.payoutX : null}
                 ticket={ticket}
               />
               {/* Welded under the felt on a phone, where a right-hand
                * rail does not exist and the thumb is at the bottom. */}
               <div className="lg:hidden">
-                <Console
-                  phase={frame.phase}
-                  stakeEth={stakeEth}
-                  onStake={setStakeEth}
-                  autoSell={autoSell}
-                  onAutoSell={setAutoSell}
-                  autoSellAtX={autoSellAtX}
-                  onAutoSellAtX={setAutoSellAtX}
-                  sound={sound}
-                  onSound={setSound}
-                  holding={stillHolding}
-                  payoutX={frame.payoutX}
-                  pnlEth={frame.pnlEth}
-                  cashed={cashedAt !== null}
-                  onCashOut={cashOut}
-                />
+                <Console {...consoleProps} />
               </div>
             </Machine>
 
@@ -206,7 +201,7 @@ export function Play() {
              * because the whole page is one centred column. */}
             {ticket && <div className="flex justify-center lg:hidden">{ticket}</div>}
 
-            <QueueRail round={round} phase={frame.phase} queue={QUEUE} />
+            <QueueRail round={round} phase={reel.phase} queue={reel.queue} />
           </div>
 
           {/* The console, in the rail, beside the chart. Rendered twice
@@ -219,25 +214,9 @@ export function Play() {
              * one inside the machine is the real console. The feed under
              * it stays visible at every width. */}
             <div className="hidden lg:block">
-              <Console
-                variant="panel"
-                phase={frame.phase}
-                stakeEth={stakeEth}
-                onStake={setStakeEth}
-                autoSell={autoSell}
-                onAutoSell={setAutoSell}
-                autoSellAtX={autoSellAtX}
-                onAutoSellAtX={setAutoSellAtX}
-                sound={sound}
-                onSound={setSound}
-                holding={stillHolding}
-                payoutX={frame.payoutX}
-                pnlEth={frame.pnlEth}
-                cashed={cashedAt !== null}
-                onCashOut={cashOut}
-              />
+              <Console variant="panel" {...consoleProps} />
             </div>
-            <FeedRail items={ACTIVITY} />
+            <FeedRail items={reel.feed} />
           </div>
         </div>
       </div>

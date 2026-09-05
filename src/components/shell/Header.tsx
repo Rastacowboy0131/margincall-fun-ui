@@ -1,5 +1,6 @@
 import { AppLink } from '../../app/AppLink'
-import { SESSION, WALLET } from '../../data/sample'
+import { WALLET } from '../../data/sample'
+import { useReel } from '../../lib/useReel'
 import { ethShort } from '../../lib/format'
 import { Wordmark } from '../brand/Wordmark'
 import { Icon } from '../ui/Icon'
@@ -28,6 +29,7 @@ export function Header({
   onGoLive: () => void
   onGoPaper: () => void
 }) {
+  const { session } = useReel()
   return (
     <header className="border-b border-rim bg-panel/95 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-[1560px] items-center justify-between gap-3 px-3 sm:px-5">
@@ -57,7 +59,7 @@ export function Header({
             <span className="flex flex-col items-end leading-none">
               <span className="eyebrow text-[9px] text-ink-3">Buying power</span>
               <span className="nums mt-0.5 text-sm font-extrabold text-gold">
-                {ethShort(SESSION.buyingPowerEth)}
+                {ethShort(session.buyingPowerEth)}
                 <span className="ml-1 text-micro font-bold text-ink-3">ETH</span>
               </span>
             </span>
