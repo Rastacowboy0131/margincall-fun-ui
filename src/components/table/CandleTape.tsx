@@ -1,70 +1,55 @@
 import type { Candle } from '../../data/types'
 import { x } from '../../lib/format'
 import { cx } from '../../lib/cx'
-import { ceilingFor, floorFor } from './trace-scale'
 
 /* ------------------------------------------------------------------ *
- * The round's price path, live.
+ * The round's price path.
  *
- * CANDLES, not a smoothed line — a trader reads open and close bodies
- * at a glance, and the how-it-works band promises "up candles, down
- * candles, dips, pumps — not an escalator".
+ * THIS IS A DRAWING, NOT A CHART LIBRARY. It takes the fixed sample
+ * path out of sample.ts and lays rectangles out over it so the stage
+ * holds the right space, at the right density, with the right shapes.
+ * There is no scale, no axis engine, no interaction model and no data
+ * layer here, and there should not be.
  *
- * Wired to the engine the same way as the margincall-onety build:
+ * Nora — what the real one has to be, and why:
  *
- *   Revealed by count. `candles` is the whole known path; `revealCount`
- *   says how much of it has happened. Candles are never re-animated,
- *   the only thing that changes between ticks is one new candle.
+ *   CANDLES, not a smoothed line. This is the single detail that makes
+ *   the product read as a trading terminal rather than as Aviator with
+ *   a new skin: a trader reads the open and the close bodies at a
+ *   glance and can see a wick that got bought back. A curve throws that
+ *   away. The copy on the how-it-works band promises "up candles, down
+ *   candles, dips, pumps — not an escalator", and this is where that
+ *   promise is either kept or broken.
  *
- *   Laddered y-scale (trace-scale.ts). Hugging the exact revealed range
- *   made the whole chart slide under the reader; a fixed range left
- *   sub-1.00x rounds off the plot. The axis steps on fixed rungs in
- *   BOTH directions instead, and the sub-1.5 ceiling rungs keep a
- *   0.7x round from wasting the top half of the plot.
+ *   Anchor at 1.00x. The dashed baseline is the round's open and every
+ *   number in the product is a multiple OF it, so it must always be in
+ *   frame even when the path runs to 20x.
  *
- *   Fixed scrolling x-window (Onety, 2026-09-05: no squashing). The
- *   plot shows the LAST N revealed candles at a constant slot width.
- *   Early round grows rightward from the left; once N candles have
- *   printed, old candles scroll off the left edge and the newest one
- *   holds the ~83% position. Slot width derives from N only, never
- *   from the total candle count, so the chart keeps its look no
- *   matter how long the round runs. The y-ladder hugs the VISIBLE
- *   window, so off-screen extremes stop pinning the scale.
+ *   Draw the viewer's entry. The dashed gold line is the difference
+ *   between "the round is at 6.84x" and "you are up 2.62x", which is
+ *   the one thing new players get wrong.
  *
- *   The marker. A tag riding the current price on the right edge,
- *   green when the head candle closed up, red when it closed down. It
- *   is HTML rather than SVG text because the viewBox is stretched
- *   (preserveAspectRatio="none") and glyphs inside it would distort.
- *
- * Anchor at 1.00x: the gold baseline is the round's open and every
- * number in the product is a multiple OF it; the ladder keeps it in
- * frame by construction. The viewer's entry is the dashed gold rule.
- *
- * No className prop, deliberately: this root must be `relative` for
- * the labels layered over the SVG, and an earlier version accepting an
- * `absolute` class from its parent collapsed the box to zero height.
- * The caller positions a wrapper instead.
+ *   The domain rule this must not break: green is a candle that closed
+ *   above its open, red is one that closed below. It is never the
+ *   direction of the round overall, and never the viewer's P&L.
  * ------------------------------------------------------------------ */
 
-const W = 1000
-const H = 100
-
-/** Fixed visible candle count. 30 fills the ~82% candle band at the
- * slot size the earlier port used as its floor; the window scrolls
- * left once the round prints more than this. */
-const VISIBLE_N = 30
-
+/*
+ * No className prop, deliberately. This component's root has to be
+ * `relative` for the labels layered over the SVG, and an earlier
+ * version also accepted an `absolute …` class from its parent. Both
+ * utilities matched, `.relative` is emitted later in Tailwind's output
+ * so it won, the box collapsed to zero height, and the entire chart
+ * silently vanished — with nothing wrong in the source. The caller
+ * positions a wrapper around this instead.
+ */
 export function CandleTape({
   candles,
-  revealCount,
   entryX,
   currentX,
   called,
 }: {
-  /** The round's full candle path, oldest first. */
   candles: Candle[]
-  /** How many candles of the path have happened yet. */
-  revealCount?: number
   /** The viewer's entry, drawn as a dashed line. Null when flat. */
   entryX: number | null
   currentX: number
@@ -81,48 +66,30 @@ export function CandleTape({
     )
   }
 
-  const n = candles.length
-  const shown = Math.max(1, Math.min(n, revealCount ?? n))
-
-  /* Fixed visible window: the last VISIBLE_N revealed candles. */
-  const start = Math.max(0, shown - VISIBLE_N)
-  const visible = candles.slice(start, shown)
-
-  /* The laddered band, computed over the VISIBLE candles only. See
-   * trace-scale.ts: do not replace this with min/max of the visible
-   * range, that regression has already been shipped and reported
-   * twice. */
-  const top = ceilingFor(visible)
-  const bottom = floorFor(visible)
+  // The visible range always contains 1.00x, the whole path, and a
+  // little headroom so the newest candle is never flush with the frame.
+  const lo = Math.min(1, ...candles.map((c) => c.lowX))
+  const hi = Math.max(1, ...candles.map((c) => c.highX))
+  const pad = (hi - lo) * 0.14 || 0.2
+  const top = hi + pad
+  const bottom = Math.max(0, lo - pad * 0.5)
   const span = top - bottom
 
+  const W = candles.length * 10
+  const H = 100
   const yOf = (v: number) => ((top - v) / span) * H
   /** As a percentage from the top — used to place HTML labels over the
    *  SVG, so the type stays crisp instead of being scaled with it. */
   const pctOf = (v: number) => `${((top - v) / span) * 100}%`
 
-  /* x window: constant slot width derived from VISIBLE_N, never from
-   * how many candles the round has printed. Candles use only ~82% of
-   * the plot: the newest candle tops out around 82-84% of the width,
-   * leaving permanent headroom on the right for the live price marker
-   * (Onety, 2026-09-05: the head must never touch the right edge). */
-  const slot = (W * 0.82) / VISIBLE_N
-  const x0 = W * 0.02
-  const bodyW = Math.max(2.5, slot * 0.7)
-  const wickW = Math.max(1, slot * 0.12)
-  const head = visible[visible.length - 1]
-  const headUp = head ? head.closeX >= head.openX : true
-  const markerX = currentX
-
-  /* Scale labels sit on the same right-hand edge as the live tag, so
-   * any that would land under it are dropped rather than overlapped.
-   * The 1.00x line is never dropped. */
+  /* Scale labels sit on the same right-hand edge as the live tag, so any
+   * that would land under it are dropped rather than overlapped. The
+   * 1.00x line is never dropped — every figure in the product is a
+   * multiple of it and it has to stay readable. */
   const gridValues = [1, ...[0.25, 0.5, 0.75].map((f) => Number((bottom + span * f).toFixed(2)))]
     .filter((v, i, a) => v > bottom && v < top && a.indexOf(v) === i)
-    .filter((v) => v === 1 || Math.abs(v - markerX) / span > 0.14)
+    .filter((v) => v === 1 || Math.abs(v - currentX) / span > 0.14)
     .sort((a, b) => b - a)
-
-  const markerVisible = markerX > bottom && markerX < top
 
   return (
     <div className="relative size-full">
@@ -144,45 +111,31 @@ export function CandleTape({
           />
         ))}
 
-        {visible.map((c, i) => {
+        {candles.map((c, i) => {
           const up = c.closeX >= c.openX
           const fill = up ? 'var(--color-up)' : 'var(--color-down)'
-          const cx0 = x0 + i * slot + slot / 2
           const bodyTop = yOf(Math.max(c.openX, c.closeX))
           const bodyBottom = yOf(Math.min(c.openX, c.closeX))
           return (
-            <g key={start + i} opacity={called ? 0.55 : i === visible.length - 1 ? 1 : 0.85}>
+            <g key={i} opacity={called ? 0.55 : 1}>
               <rect
-                x={cx0 - wickW / 2}
+                x={i * 10 + 4.4}
                 y={yOf(c.highX)}
-                width={wickW}
+                width="1.2"
                 height={Math.max(0.4, yOf(c.lowX) - yOf(c.highX))}
                 fill={fill}
                 opacity="0.65"
               />
               <rect
-                x={cx0 - bodyW / 2}
+                x={i * 10 + 1.5}
                 y={bodyTop}
-                width={bodyW}
+                width="7"
                 height={Math.max(0.9, bodyBottom - bodyTop)}
                 fill={fill}
               />
             </g>
           )
         })}
-
-        {/* the live edge: a rule running out from the last close to the
-            marker sitting at the end of it */}
-        {head && !called && (
-          <rect
-            x={x0 + (visible.length - 1) * slot + slot / 2}
-            y={yOf(head.closeX)}
-            width={Math.max(0, W - (x0 + (visible.length - 1) * slot + slot / 2))}
-            height="0.3"
-            fill={headUp ? 'var(--color-up)' : 'var(--color-down)'}
-            opacity="0.4"
-          />
-        )}
 
         {entryX !== null && entryX > bottom && entryX < top && (
           <rect x="0" y={yOf(entryX)} width={W} height="0.3" fill="var(--color-gold)" opacity="0.9" />
@@ -214,17 +167,15 @@ export function CandleTape({
           </span>
         )}
 
-        {markerVisible && (
-          <span
-            className={cx(
-              'nums absolute right-1 -translate-y-1/2 rounded-tag px-1.5 py-0.5 text-[10px] font-extrabold',
-              called || !headUp ? 'bg-down text-void' : 'bg-up text-void',
-            )}
-            style={{ top: pctOf(markerX), zIndex: 1 }}
-          >
-            {x(markerX)}
-          </span>
-        )}
+        <span
+          className={cx(
+            'nums absolute right-1 -translate-y-1/2 rounded-tag px-1.5 py-0.5 text-[10px] font-extrabold',
+            called ? 'bg-down text-void' : 'bg-up text-void',
+          )}
+          style={{ top: pctOf(currentX), zIndex: 1 }}
+        >
+          {x(currentX)}
+        </span>
       </div>
     </div>
   )

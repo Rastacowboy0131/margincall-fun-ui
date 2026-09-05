@@ -1,4 +1,4 @@
-import type { Result } from '../../data/types'
+import { RESULTS } from '../../data/sample'
 import { BAND_LABEL, bandOf, x, type ResultBand } from '../../lib/format'
 import { cx } from '../../lib/cx'
 
@@ -24,16 +24,7 @@ const BAND: Record<ResultBand, string> = {
   monster: 'border-live-deep/55 bg-live-wash text-live',
 }
 
-export function ResultsStrip({
-  liveX,
-  phase,
-  results,
-}: {
-  liveX: number
-  phase: string
-  /** Settled rounds, newest first, from the engine. */
-  results: Result[]
-}) {
+export function ResultsStrip({ liveX, phase }: { liveX: number; phase: string }) {
   return (
     <div className="border-b border-rim bg-void/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-[1560px] items-center gap-3 px-3 sm:px-5">
@@ -44,9 +35,15 @@ export function ResultsStrip({
            * entire tension of the game, so it is drawn as an outline
            * rather than a filled pill. */}
           <li className="shrink-0">
+            {/* Keyed on the phase so the pill re-mounts and slides in
+             * each time the round changes state. The strip is the one
+             * thing on this page a player checks between rounds; it had
+             * no reaction at all when a round settled, which made the
+             * most-read element on the page the deadest one. */}
             <span
+              key={phase}
               className={cx(
-                'nums flex h-8 items-center gap-1.5 rounded-tag border-2 px-2.5 text-xs font-extrabold',
+                'anim-slot nums flex h-8 items-center gap-1.5 rounded-tag border-2 px-2.5 text-xs font-extrabold',
                 phase === 'called'
                   ? 'border-down bg-down-wash text-down'
                   : 'border-gold bg-transparent text-gold',
@@ -65,7 +62,7 @@ export function ResultsStrip({
 
           <li aria-hidden="true" className="h-5 w-px shrink-0 bg-rim" />
 
-          {results.map((r) => {
+          {RESULTS.map((r) => {
             const band = bandOf(r.ruggedAtX)
             return (
               <li key={r.roundId} className="shrink-0">

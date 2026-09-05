@@ -21,6 +21,15 @@ import { cx } from '../../lib/cx'
  * who cannot see the reel actually needs.
  * ------------------------------------------------------------------ */
 
+/* The reel never gets wider than the column it sits in.
+ *
+ * --text-reel is the viewport-driven size that every screen already
+ * looked right at; 34cqi is a ceiling measured against the number's own
+ * column, which narrows when the printed ticket sits beside it on the
+ * felt. min() means the ceiling only ever binds when the column is
+ * genuinely tight, so no size that already looked good changes. */
+const REEL_SIZE = 'min(var(--text-reel), 34cqi)'
+
 export function Multiplier({
   phase,
   currentX,
@@ -86,7 +95,7 @@ export function Multiplier({
           <span
             key={opensInSec}
             className={cx('anim-slam reel-face text-reel', tone)}
-            style={{ textShadow: glow }}
+            style={{ textShadow: glow, fontSize: REEL_SIZE }}
             aria-hidden="true"
           >
             {opensInSec}
@@ -96,7 +105,7 @@ export function Multiplier({
         <span
           key={`${phase}-${currentX}`}
           className={cx('anim-slam reel-face text-reel', tone)}
-          style={{ textShadow: glow }}
+          style={{ textShadow: glow, fontSize: REEL_SIZE }}
           aria-hidden="true"
         >
           {currentX.toFixed(2)}

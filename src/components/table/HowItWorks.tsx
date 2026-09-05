@@ -39,10 +39,10 @@ const STEPS = [
 ]
 
 export function HowItWorks() {
-  const { ref, shown } = useRevealOnce<HTMLDivElement>()
+  const { ref, shown } = useRevealOnce<HTMLOListElement>()
 
   return (
-    <section ref={ref} className="mx-auto max-w-[1560px] px-3 py-12 sm:px-5 lg:py-16">
+    <section className="mx-auto max-w-[1560px] px-3 py-12 sm:px-5 lg:py-16">
       <h2 className="font-sign text-poster tracking-tight">
         <span className="text-ink">HOW IT </span>
         <span className="text-gold">WORKS</span>
@@ -51,7 +51,7 @@ export function HowItWorks() {
         It is a leveraged position, not a slot machine. That distinction is the entire game.
       </p>
 
-      <ol className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <ol ref={ref} className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {STEPS.map((s, i) => (
           <li
             key={s.title}
