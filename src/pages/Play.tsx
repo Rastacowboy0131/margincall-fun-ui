@@ -201,7 +201,7 @@ export function Play() {
              * because the whole page is one centred column. */}
             {ticket && <div className="flex justify-center lg:hidden">{ticket}</div>}
 
-            <QueueRail round={round} phase={reel.phase} queue={reel.queue} />
+            <QueueRail round={round} phase={reel.phase} results={reel.results} />
           </div>
 
           {/* The console, in the rail, beside the chart. Rendered twice

@@ -69,6 +69,7 @@ export interface Result {
   /** The multiple the round rugged at. */
   ruggedAtX: number
   ticker: string
+  leverage: number
 }
 
 /** A row in the "at the table" rail. */

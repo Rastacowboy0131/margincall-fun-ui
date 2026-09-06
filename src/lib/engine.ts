@@ -415,7 +415,7 @@ export class Engine {
     this.phase = 'called'
     this.ruggedAtX = rugPrice
     this.results = [
-      { roundId: this.roundId, ruggedAtX: rugPrice, ticker: this.ticker.symbol },
+      { roundId: this.roundId, ruggedAtX: rugPrice, ticker: this.ticker.symbol, leverage: this.leverage },
       ...this.results,
     ].slice(0, 14)
     this.phaseStart = performance.now()

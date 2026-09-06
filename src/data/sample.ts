@@ -145,20 +145,20 @@ export const POSITION: Position = {
  * roulette board. Every id below 4417 that also appears in HISTORY
  * carries the same ruggedAtX there. */
 export const RESULTS: Result[] = [
-  { roundId: 4416, ruggedAtX: 2.79, ticker: 'AMZNx' },
-  { roundId: 4415, ruggedAtX: 2.21, ticker: 'HOODx' },
-  { roundId: 4414, ruggedAtX: 0.61, ticker: 'SPYx' },
-  { roundId: 4413, ruggedAtX: 1.02, ticker: 'AAPLx' },
-  { roundId: 4412, ruggedAtX: 15.85, ticker: 'GMEx' },
-  { roundId: 4411, ruggedAtX: 1.33, ticker: 'TSLAx' },
-  { roundId: 4410, ruggedAtX: 4.02, ticker: 'NVDAx' },
-  { roundId: 4409, ruggedAtX: 2.34, ticker: 'HOODx' },
-  { roundId: 4408, ruggedAtX: 1.07, ticker: 'TSLAx' },
-  { roundId: 4407, ruggedAtX: 7.53, ticker: 'NVDAx' },
-  { roundId: 4406, ruggedAtX: 1.0, ticker: 'SPYx' },
-  { roundId: 4405, ruggedAtX: 3.06, ticker: 'GMEx' },
-  { roundId: 4404, ruggedAtX: 1.19, ticker: 'AAPLx' },
-  { roundId: 4403, ruggedAtX: 24.6, ticker: 'AMZNx' },
+  { roundId: 4416, ruggedAtX: 2.79, ticker: 'AMZNx', leverage: 5 },
+  { roundId: 4415, ruggedAtX: 2.21, ticker: 'HOODx', leverage: 5 },
+  { roundId: 4414, ruggedAtX: 0.61, ticker: 'SPYx', leverage: 5 },
+  { roundId: 4413, ruggedAtX: 1.02, ticker: 'AAPLx', leverage: 5 },
+  { roundId: 4412, ruggedAtX: 15.85, ticker: 'GMEx', leverage: 5 },
+  { roundId: 4411, ruggedAtX: 1.33, ticker: 'TSLAx', leverage: 5 },
+  { roundId: 4410, ruggedAtX: 4.02, ticker: 'NVDAx', leverage: 5 },
+  { roundId: 4409, ruggedAtX: 2.34, ticker: 'HOODx', leverage: 5 },
+  { roundId: 4408, ruggedAtX: 1.07, ticker: 'TSLAx', leverage: 5 },
+  { roundId: 4407, ruggedAtX: 7.53, ticker: 'NVDAx', leverage: 5 },
+  { roundId: 4406, ruggedAtX: 1.0, ticker: 'SPYx', leverage: 5 },
+  { roundId: 4405, ruggedAtX: 3.06, ticker: 'GMEx', leverage: 5 },
+  { roundId: 4404, ruggedAtX: 1.19, ticker: 'AAPLx', leverage: 5 },
+  { roundId: 4403, ruggedAtX: 24.6, ticker: 'AMZNx', leverage: 5 },
 ]
 
 /* The rail down the left of the table. The viewer is deliberately NOT
