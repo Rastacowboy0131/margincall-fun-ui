@@ -126,7 +126,7 @@
   /* the two display sizes — headings, and the number the game is about */
   --text-poster: clamp(2.25rem, 6.5vw, 4rem);
   --text-poster--line-height: 0.94;
-  --text-reel: clamp(4.25rem, 16vw, 9.5rem);
+  --text-reel: clamp(2.5rem, 8.5vw, 5rem);
   --text-reel--line-height: 0.84;
 
   /* --- geometry --------------------------------------------------------- *

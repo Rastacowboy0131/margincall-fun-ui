@@ -34,7 +34,7 @@ import { cx } from '../../lib/cx'
  * column, which narrows when the printed ticket sits beside it on the
  * felt. min() means the ceiling only ever binds when the column is
  * genuinely tight, so no size that already looked good changes. */
-const REEL_SIZE = 'min(var(--text-reel), 34cqi)'
+const REEL_SIZE = 'min(var(--text-reel), 22cqi)'
 
 export function Multiplier({
   phase,
@@ -119,7 +119,7 @@ export function Multiplier({
         </span>
       )}
 
-      <p className="mt-1 min-h-[22px] text-center text-sm font-semibold text-ink-2">
+      <p className="mt-0.5 min-h-[18px] text-center text-xs font-semibold text-ink-2 sm:text-[13px]">
         {phase === 'called' ? (
           <>
             Rugged at <span className="nums font-extrabold text-down">{x(currentX)}</span>. Anyone

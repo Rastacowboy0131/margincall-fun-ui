@@ -113,10 +113,12 @@ export function Felt({
       <div className="relative z-10 flex flex-1 flex-col">
         {/* When the ticket is on the felt the chart starts to the right
          * of it, rather than running underneath the paper where the
-         * first third of the round would be hidden. */}
+         * first third of the round would be hidden. The top inset
+         * reserves the band where the multiplier now lives, so the
+         * candle path never runs under the number. */}
         <div
           className={cx(
-            'absolute top-3 right-3 bottom-3 left-3 sm:right-5 sm:left-5',
+            'absolute top-16 right-3 bottom-3 left-3 sm:top-20 sm:right-5 sm:left-5 lg:top-[104px]',
             Boolean(ticket) && 'xl:left-[302px]',
           )}
         >
@@ -129,22 +131,29 @@ export function Felt({
           />
         </div>
 
-        {/* From xl the ticket sits ON the felt, to the left of the
-         * number, as a column of its own. */}
+        {/* From xl the ticket sits ON the felt, to the left, as a
+         * column of its own. */}
         <div className="relative z-20 flex flex-1 items-end gap-5 px-4 pb-5 sm:px-6">
           {ticket && <div className="hidden shrink-0 xl:block">{ticket}</div>}
-          {/* @container: the multiplier is sized against THIS column, not
-           * the viewport. The column narrows when the ticket is beside
-           * it, and at 1280 that used to clip the "x" clean off the end
-           * of the number. See Multiplier.tsx. */}
-          <div className="@container grid min-w-0 flex-1 place-items-center self-center pb-4">
-            <Multiplier
-              phase={phase}
-              currentX={round.currentX}
-              opensInSec={round.opensInSec}
-              payoutX={payoutX}
-            />
-          </div>
+          <div className="min-w-0 flex-1" />
+        </div>
+
+        {/* The multiplier sits at the TOP of the plot area (top-center),
+         * clear of the candle path, offset right when the ticket column
+         * is on the felt so it stays centered over the chart itself.
+         * @container: sized against this band, not the viewport. */}
+        <div
+          className={cx(
+            '@container pointer-events-none absolute inset-x-3 top-2 z-20 grid place-items-center sm:inset-x-5 sm:top-3',
+            Boolean(ticket) && 'xl:left-[302px]',
+          )}
+        >
+          <Multiplier
+            phase={phase}
+            currentX={round.currentX}
+            opensInSec={round.opensInSec}
+            payoutX={payoutX}
+          />
         </div>
       </div>
 
