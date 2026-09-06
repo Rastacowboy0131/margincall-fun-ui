@@ -10,6 +10,7 @@ import { PlayersRail } from '../components/table/PlayersRail'
 import { QueueRail } from '../components/table/QueueRail'
 import { FeedRail } from '../components/table/FeedRail'
 import { HowItWorks } from '../components/table/HowItWorks'
+import { floorSig } from '../components/table/Console'
 
 /* ------------------------------------------------------------------ *
  * The table.
@@ -45,7 +46,7 @@ export function Play() {
    * live range the moment the live max is known. */
   useEffect(() => {
     if (live && reel.liveMaxStakeEth > 0 && stakeEth > reel.liveMaxStakeEth) {
-      setStakeEth(Number(reel.liveMaxStakeEth.toPrecision(2)))
+      setStakeEth(floorSig(reel.liveMaxStakeEth))
     }
   }, [live, reel.liveMaxStakeEth, stakeEth])
 

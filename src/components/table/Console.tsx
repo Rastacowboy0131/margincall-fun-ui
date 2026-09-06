@@ -7,6 +7,14 @@ import { Icon } from '../ui/Icon'
 import { Key } from '../ui/Key'
 import { cx } from '../../lib/cx'
 
+/** Round DOWN to 2 significant figures: a live chip must never exceed
+ *  the on-chain max stake it was derived from, or every buy reverts. */
+export function floorSig(v: number): number {
+  if (v <= 0) return 0
+  const mag = Math.pow(10, Math.floor(Math.log10(v)) - 1)
+  return Math.floor(v / mag) * mag
+}
+
 /* ------------------------------------------------------------------ *
  * THE CONSOLE.
  *
@@ -104,7 +112,7 @@ export function Console({
    * would all revert. Denominations become 25/50/75/100% of the max. */
   const chips: readonly number[] = live
     ? liveMaxStakeEth > 0
-      ? [0.25, 0.5, 0.75, 1].map((f) => Number((liveMaxStakeEth * f).toPrecision(2)))
+      ? [0.25, 0.5, 0.75, 1].map((f) => floorSig(liveMaxStakeEth * f))
       : []
     : STAKE_CHIPS_ETH
   const maxStake = live ? liveMaxStakeEth : CHAIN.maxStakeEth
