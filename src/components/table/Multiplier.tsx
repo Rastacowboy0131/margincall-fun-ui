@@ -10,9 +10,15 @@ import { cx } from '../../lib/cx'
  * axis pushed wide so it reads like a machine printed it, and nothing
  * else on the felt is allowed to compete.
  *
- * A key is set on the value so React remounts the element on every
- * change, which restarts the landing animation. Without it the number
- * updates in place and the whole stage goes dead.
+ * A key is set on the PHASE so React remounts the element when the
+ * round opens, rugs, or resets, which restarts the landing animation
+ * at each of those moments. The key must NOT include the live value:
+ * the engine ticks currentX every 50ms, and remounting per tick
+ * restarts the 420ms slam (which begins at opacity 0, scale 1.45)
+ * before it can finish, pinning the number at its invisible first
+ * frame for the whole round. Between phase changes the digits update
+ * in place; tabular-nums on .reel-face keeps the width stable so the
+ * ticking reads as a machine counter, not a flicker.
  *
  * Accessibility: the digits themselves are hidden from screen readers,
  * because a value that changes every second and a live region are a
@@ -103,7 +109,7 @@ export function Multiplier({
         </div>
       ) : (
         <span
-          key={`${phase}-${currentX}`}
+          key={phase}
           className={cx('anim-slam reel-face text-reel', tone)}
           style={{ textShadow: glow, fontSize: REEL_SIZE }}
           aria-hidden="true"
