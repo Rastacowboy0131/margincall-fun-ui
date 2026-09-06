@@ -128,10 +128,17 @@ export function Multiplier({
         ) : phase === 'intermission' ? (
           <>Queue a buy now and you fill at the 1.00x open.</>
         ) : payoutX !== null ? (
-          <>
-            You are up{' '}
-            <span className="nums font-extrabold text-up">{x(payoutX)}</span> on your entry
-          </>
+          payoutX >= 1 ? (
+            <>
+              You are up{' '}
+              <span className="nums font-extrabold text-up">{x(payoutX)}</span> on your entry
+            </>
+          ) : (
+            <>
+              You are down{' '}
+              <span className="nums font-extrabold text-down">{x(payoutX)}</span> on your entry
+            </>
+          )
         ) : (
           <>
             No position. Buy at <span className="nums font-extrabold text-ink">{x(currentX)}</span>{' '}
