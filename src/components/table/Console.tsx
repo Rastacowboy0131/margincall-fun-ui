@@ -51,6 +51,8 @@ export function Console({
   onBuy,
   onCashOut,
   cashed,
+  live = false,
+  liveMaxStakeEth = 0,
   variant = 'welded',
 }: {
   phase: RoundPhase
@@ -73,6 +75,10 @@ export function Console({
   onBuy: () => void
   onCashOut: () => void
   cashed: boolean
+  /** True in live (on-chain) mode: chips shrink to the on-chain max. */
+  live?: boolean
+  /** 2%-of-bankroll max stake in ETH; 0 when unknown. */
+  liveMaxStakeEth?: number
   /** 'welded' sits under the felt as part of the machine (phones).
    *  'panel' is a standalone object in the right-hand rail, beside the
    *  chart, which is where it belongs on a desktop: you can watch the
@@ -92,6 +98,17 @@ export function Console({
   // that stops you acting is the round being over, a buy already queued,
   // or the stake outrunning your buying power.
   const canAct = !frozen && !queued && canBuy
+
+  /* Live chips: the on-chain max stake is a fraction of the bankroll
+   * (testnet bankrolls are tiny), so the demo's 0.1-5 ETH clay chips
+   * would all revert. Denominations become 25/50/75/100% of the max. */
+  const chips: readonly number[] = live
+    ? liveMaxStakeEth > 0
+      ? [0.25, 0.5, 0.75, 1].map((f) => Number((liveMaxStakeEth * f).toPrecision(2)))
+      : []
+    : STAKE_CHIPS_ETH
+  const maxStake = live ? liveMaxStakeEth : CHAIN.maxStakeEth
+  const stakeDp = live ? 6 : 2
 
   const panel = variant === 'panel'
 
@@ -139,24 +156,24 @@ export function Console({
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="eyebrow text-ink-3">Stake</span>
             <div className="flex items-center gap-2">
-              <span className="nums rounded-tag border border-rim bg-void px-2 py-1 text-xs font-extrabold text-gold">
-                {stakeEth.toFixed(2)} ETH
+              <span className="nums rounded-tag border border-rim bg-void px-2 py-1 text-xs font-extrabold text-gold" data-testid="stake-readout">
+                {stakeEth.toFixed(stakeDp)} ETH
               </span>
               {/* MAX lives up here beside the readout rather than at the
                * end of the chip tray, where it was the first thing to
                * scroll out of reach on a phone. */}
               <Key
-                variant={(STAKE_CHIPS_ETH as readonly number[]).includes(stakeEth) ? 'quiet' : 'cash'}
+                variant={(chips as readonly number[]).includes(stakeEth) ? 'quiet' : 'cash'}
                 size="sm"
                 className="shrink-0"
-                onClick={() => onStake(CHAIN.maxStakeEth)}
+                onClick={() => onStake(maxStake)}
               >
                 MAX
               </Key>
             </div>
           </div>
           <div className="rail flex items-center gap-2.5 pt-1.5 pb-0.5">
-            {STAKE_CHIPS_ETH.map((v, i) => (
+            {chips.map((v, i) => (
               <Chip
                 key={v}
                 valueEth={v}

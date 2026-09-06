@@ -1,5 +1,4 @@
 import { AppLink } from '../../app/AppLink'
-import { WALLET } from '../../data/sample'
 import { useReel } from '../../lib/useReel'
 import { ethShort } from '../../lib/format'
 import { Wordmark } from '../brand/Wordmark'
@@ -33,7 +32,7 @@ export function Header({
   onGoLive: () => void
   onGoPaper: () => void
 }) {
-  const { session } = useReel()
+  const { session, mode } = useReel()
   const profile = useProfile()
   return (
     <header className="border-b border-rim bg-panel/95 backdrop-blur-md">
@@ -54,7 +53,7 @@ export function Header({
            * about the state you are in, so it is a switch you can reach
            * at every width — not a badge, and not something buried a
            * sheet deep. Tapping LIVE is the way into the wallet flow. */}
-          <ModeSwitch mode={WALLET.mode} onGoLive={onGoLive} onGoPaper={onGoPaper} />
+          <ModeSwitch mode={mode} onGoLive={onGoLive} onGoPaper={onGoPaper} />
 
           <button
             type="button"

@@ -1,5 +1,7 @@
-import { CHAIN, WALLET } from '../../data/sample'
+import { CHAIN } from '../../data/sample'
 import { useReel } from '../../lib/useReel'
+import { getAddress } from '../../lib/mode'
+import { LIVE_CHAIN } from '../../lib/live/config'
 import { eth, signedEth } from '../../lib/format'
 import { Key } from '../ui/Key'
 import { Sheet } from '../ui/Sheet'
@@ -17,7 +19,10 @@ export function BalanceSheet({ open, onClose, onGoLive }: {
   onClose: () => void
   onGoLive: () => void
 }) {
-  const { session, resetAccount } = useReel()
+  const { session, resetAccount, mode } = useReel()
+  const live = mode === 'live'
+  const addr = getAddress()
+  const addrShort = addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : '—'
 
   const rows: Array<[string, string, string]> = [
     ['Buying power', `${eth(session.buyingPowerEth)} ETH`, 'text-ink'],
@@ -35,11 +40,15 @@ export function BalanceSheet({ open, onClose, onGoLive }: {
       onClose={onClose}
       labelId="balance-sheet-title"
       title="Your money"
-      subtitle={`Paper trading. Nothing here has touched ${CHAIN.networkName}.`}
+      subtitle={
+        live
+          ? `Live on ${LIVE_CHAIN.chainName}. Buying power is your wallet balance.`
+          : `Paper trading. Nothing here has touched ${CHAIN.networkName}.`
+      }
     >
       <div className="mb-4 flex items-center gap-2">
-        <Tag tone="gold">{WALLET.mode === 'demo' ? 'Demo · paper' : 'Live · on chain'}</Tag>
-        <span className="nums text-xs text-ink-3">{WALLET.addressShort}</span>
+        <Tag tone="gold">{live ? 'Live · on chain' : 'Demo · paper'}</Tag>
+        <span className="nums text-xs text-ink-3">{live ? addrShort : ''}</span>
       </div>
 
       <dl className="overflow-hidden rounded-key border border-rim">
@@ -60,19 +69,23 @@ export function BalanceSheet({ open, onClose, onGoLive }: {
         </div>
       </dl>
 
-      <Key variant="cash" size="xl" full className="mt-4" onClick={onGoLive}>
-        Go live on {CHAIN.networkName}
-      </Key>
-
-      <div className="mt-5 border-t border-rim pt-4">
-        <Key variant="quiet" size="md" full onClick={resetAccount}>
-          <span className="text-down">Reset paper balance</span>
+      {!live && (
+        <Key variant="cash" size="xl" full className="mt-4" onClick={onGoLive}>
+          Go live on {CHAIN.networkName}
         </Key>
-        <p className="mt-2 text-xs text-ink-3">
-          Puts you back to {eth(CHAIN.paperStartEth, 0)} ETH and wipes this session&rsquo;s log.
-          Your leaderboard entries stay where everyone can see them.
-        </p>
-      </div>
+      )}
+
+      {!live && (
+        <div className="mt-5 border-t border-rim pt-4">
+          <Key variant="quiet" size="md" full onClick={resetAccount}>
+            <span className="text-down">Reset paper balance</span>
+          </Key>
+          <p className="mt-2 text-xs text-ink-3">
+            Puts you back to {eth(CHAIN.paperStartEth, 0)} ETH and wipes this session&rsquo;s log.
+            Your leaderboard entries stay where everyone can see them.
+          </p>
+        </div>
+      )}
     </Sheet>
   )
 }

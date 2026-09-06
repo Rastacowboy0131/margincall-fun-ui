@@ -7,6 +7,7 @@ import { Tape } from '../components/shell/Tape'
 import { BalanceSheet } from '../components/shell/BalanceSheet'
 import { ConnectSheet } from '../components/shell/ConnectSheet'
 import { ProfileSheet } from '../components/shell/ProfileSheet'
+import { goPaper } from '../lib/mode'
 
 /* ------------------------------------------------------------------ *
  * The shell. Routing, page title, and the two sheets the header can
@@ -53,7 +54,7 @@ export function AppShell() {
           onOpenBalance={() => setSheet('balance')}
           onOpenProfile={() => setSheet('profile')}
           onGoLive={() => setSheet('connect')}
-          onGoPaper={() => setSheet('balance')}
+          onGoPaper={() => goPaper()}
         />
       </div>
 

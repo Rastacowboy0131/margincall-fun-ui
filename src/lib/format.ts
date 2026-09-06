@@ -28,9 +28,12 @@ export function eth(value: number, dp = 2): string {
 }
 
 /** Balances run to five figures, so the header would otherwise reflow
- *  every time one changed. `9,496.66` -> `9.50K`. */
+ *  every time one changed. `9,496.66` -> `9.50K`. Live testnet balances
+ *  run to five DECIMALS instead, so tiny-but-nonzero shows 4dp rather
+ *  than a lying 0.00. */
 export function ethShort(value: number): string {
   if (Math.abs(value) >= 1000) return `${(value / 1000).toFixed(2)}K`
+  if (value !== 0 && Math.abs(value) < 0.01) return value.toFixed(4)
   return value.toFixed(2)
 }
 

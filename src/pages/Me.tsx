@@ -40,6 +40,7 @@ function Outcome({ row }: { row: HistoryRow }) {
 export function Me() {
   const reel = useReel()
   const { you, session, history: HISTORY } = reel
+  const live = reel.mode === 'live'
   const profile = useProfile()
   const [editing, setEditing] = useState(false)
 
@@ -72,14 +73,21 @@ export function Me() {
         first="THE"
         second="DAMAGE"
         lead={
-          <>
-            Paper positions, paper P&amp;L, real lessons. Everything here lives in your browser
-            until {CHAIN.networkName} mainnet ships.
-          </>
+          live ? (
+            <>
+              Live positions, real ETH, the same lessons. Settled on Robinhood Chain; this log
+              lives in your browser.
+            </>
+          ) : (
+            <>
+              Paper positions, paper P&amp;L, real lessons. Everything here lives in your browser
+              until {CHAIN.networkName} mainnet ships.
+            </>
+          )
         }
         aside={
           <div className="flex items-center gap-2">
-            <Tag tone="gold">Paper trading</Tag>
+            <Tag tone="gold">{live ? 'Live · on chain' : 'Paper trading'}</Tag>
             <Tag tone="live">{session.streakDays}-day streak</Tag>
           </div>
         }
@@ -100,7 +108,7 @@ export function Me() {
               <span className="truncate text-lg font-extrabold tracking-tight text-ink">
                 {displayName(profile)}
               </span>
-              <Tag tone="gold">Demo</Tag>
+              <Tag tone="gold">{live ? 'Live' : 'Demo'}</Tag>
             </div>
             <p className="mt-0.5 truncate text-xs text-ink-3">
               {socials.length > 0
@@ -176,7 +184,7 @@ export function Me() {
         </Panel>
 
         {/* ---- the money ---- */}
-        <Panel title="Paper balance" bodyClassName="p-0">
+        <Panel title={live ? 'Wallet balance' : 'Paper balance'} bodyClassName="p-0">
           <dl className="divide-y divide-rim">
             {[
               ['Buying power', `${eth(session.buyingPowerEth)} ETH`, 'text-ink'],

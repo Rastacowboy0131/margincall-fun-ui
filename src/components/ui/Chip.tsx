@@ -38,6 +38,15 @@ function chipFace(index: number): ChipFace {
   return FACES[index % FACES.length]
 }
 
+/** The denomination printed on the face. Demo chips are 0.1-5 ETH; live
+ *  testnet chips can be micro-ETH, which need a unit to stay readable. */
+function chipLabel(valueEth: number): string {
+  if (valueEth >= 1) return String(valueEth)
+  if (valueEth >= 0.01) return valueEth.toFixed(1).replace(/^0/, '.')
+  if (valueEth >= 0.0001) return `${(valueEth * 1000).toPrecision(2)}m`
+  return `${Math.round(valueEth * 1e6)}µ`
+}
+
 interface ChipProps {
   /** Stake this chip sets, in ETH. Printed on the face. */
   valueEth: number
@@ -98,11 +107,11 @@ export function Chip({ valueEth, index, selected, onSelect, size = 56 }: ChipPro
         className="pointer-events-none absolute font-sign nums"
         style={{
           color: face.ink,
-          fontSize: valueEth >= 1 ? size * 0.3 : size * 0.235,
+          fontSize: valueEth >= 1 ? size * 0.3 : valueEth >= 0.01 ? size * 0.235 : size * 0.21,
           letterSpacing: '-0.02em',
         }}
       >
-        {valueEth >= 1 ? valueEth : valueEth.toFixed(1).replace(/^0/, '.')}
+        {chipLabel(valueEth)}
       </span>
       <span className="sr-only">{`Stake ${valueEth} ETH`}</span>
     </button>

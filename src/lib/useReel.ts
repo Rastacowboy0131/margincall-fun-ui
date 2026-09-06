@@ -11,6 +11,8 @@ import type {
   Ticker,
 } from '../data/types'
 import { getEngine, MAX_PAYOUT_X } from './engine'
+import { getLiveEngine } from './liveEngine'
+import { getMode, subscribeMode } from './mode'
 import type { YouState } from './engine'
 
 /* ------------------------------------------------------------------ *
@@ -27,6 +29,12 @@ import type { YouState } from './engine'
  * ------------------------------------------------------------------ */
 
 export interface Reel {
+  /** 'demo' (paper engine) or 'live' (chain + operator ws). */
+  mode: 'demo' | 'live'
+  /** Last live-mode error worth surfacing (bad stake, tx revert). */
+  liveError: string | null
+  /** Max live stake in ETH (2% of bankroll), 0 when unknown. */
+  liveMaxStakeEth: number
   phase: RoundPhase
   roundId: number
   ticker: Ticker
@@ -67,22 +75,37 @@ let cache: Reel | null = null
 let cacheKey = -1
 let version = 0
 
-const engine = () => getEngine()
+const engine = () => (getMode() === 'live' ? getLiveEngine() : getEngine())
 
 function subscribe(fn: () => void): () => void {
-  return engine().subscribe(() => {
+  const bump = () => {
     version += 1
     fn()
-  })
+  }
+  // Subscribe to BOTH engines plus the mode store: a mode flip must
+  // rebuild the snapshot immediately, and the demo engine keeps running
+  // in the background so paper state is exactly as you left it.
+  const un1 = getEngine().subscribe(bump)
+  const un2 = getLiveEngine().subscribe(bump)
+  const un3 = subscribeMode(bump)
+  return () => {
+    un1()
+    un2()
+    un3()
+  }
 }
 
 function getSnapshot(): Reel {
   if (cache && cacheKey === version) return cache
   const e = engine()
+  const live = getMode() === 'live'
   const you = e.you
   const inPos = you.status === 'in' && you.entryX !== null
   const payoutX = inPos ? Math.min(MAX_PAYOUT_X, e.currentX / (you.entryX as number)) : null
   cache = {
+    mode: live ? 'live' : 'demo',
+    liveError: live ? getLiveEngine().lastError : null,
+    liveMaxStakeEth: live ? getLiveEngine().maxStakeEth : 0,
     phase: e.phase,
     roundId: e.roundId,
     ticker: e.ticker,

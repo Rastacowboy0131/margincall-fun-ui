@@ -38,6 +38,16 @@ export function Play() {
   const [sound, setSound] = useState(true)
 
   const { you } = reel
+  const live = reel.mode === 'live'
+
+  /* Entering live mode with the demo's 0.5 ETH default selected would
+   * leave every buy reverting on the 2% max; clamp the stake into the
+   * live range the moment the live max is known. */
+  useEffect(() => {
+    if (live && reel.liveMaxStakeEth > 0 && stakeEth > reel.liveMaxStakeEth) {
+      setStakeEth(Number(reel.liveMaxStakeEth.toPrecision(2)))
+    }
+  }, [live, reel.liveMaxStakeEth, stakeEth])
 
   /* Auto-sell: fires the same sell the button does, once, the first
    * tick the payout multiple touches the target. */
@@ -102,7 +112,15 @@ export function Play() {
 
   /* Console props, built once: the page renders the console twice (the
    * welded copy on phones, the panel copy in the rail from lg), and
-   * both copies MUST read the same values so they can never disagree. */
+   * both copies MUST read the same values so they can never disagree.
+   *
+   * Live mode tightens canBuy: entries only exist during the betting
+   * window (the contract rejects mid-round buys), and the stake must
+   * clear the on-chain 2%-of-bankroll max as well as the wallet. */
+  const liveCanBuy =
+    reel.phase === 'intermission' &&
+    stakeEth <= reel.session.buyingPowerEth &&
+    (reel.liveMaxStakeEth <= 0 || stakeEth <= reel.liveMaxStakeEth)
   const consoleProps = {
     phase: reel.phase,
     stakeEth,
@@ -118,9 +136,11 @@ export function Play() {
     payoutX: reel.payoutX,
     pnlEth: reel.pnlEth,
     cashed,
-    canBuy: stakeEth <= reel.session.buyingPowerEth,
+    canBuy: live ? liveCanBuy : stakeEth <= reel.session.buyingPowerEth,
     onBuy: () => reel.buy(stakeEth),
     onCashOut: () => reel.sell(),
+    live,
+    liveMaxStakeEth: reel.liveMaxStakeEth,
   }
 
   /* Your seat is built here rather than living in the roster, so the
@@ -141,6 +161,14 @@ export function Play() {
       <div className="sticky top-14 z-30">
         <ResultsStrip liveX={reel.currentX} phase={reel.phase} results={reel.results} />
       </div>
+
+      {live && reel.liveError && (
+        <div className="mx-auto max-w-[1560px] px-3 pt-3 sm:px-5" data-testid="live-error">
+          <p className="rounded-tag border border-down/40 bg-down/10 px-3 py-2 text-xs text-ink" role="alert">
+            {reel.liveError}
+          </p>
+        </div>
+      )}
 
       <div className="mx-auto max-w-[1560px] px-3 py-3 sm:px-5 lg:py-5">
         <h1 className="sr-only">Margin Call — the table</h1>
