@@ -6,6 +6,7 @@ import { TabBar } from '../components/shell/TabBar'
 import { Tape } from '../components/shell/Tape'
 import { BalanceSheet } from '../components/shell/BalanceSheet'
 import { ConnectSheet } from '../components/shell/ConnectSheet'
+import { ProfileSheet } from '../components/shell/ProfileSheet'
 
 /* ------------------------------------------------------------------ *
  * The shell. Routing, page title, and the two sheets the header can
@@ -23,7 +24,7 @@ const TITLES: Record<string, string> = {
 
 export function AppShell() {
   const { pathname } = useLocation()
-  const [sheet, setSheet] = useState<'none' | 'balance' | 'connect'>('none')
+  const [sheet, setSheet] = useState<'none' | 'balance' | 'connect' | 'profile'>('none')
 
   useEffect(() => {
     document.title = TITLES[pathname] ?? 'Margin Call'
@@ -50,6 +51,7 @@ export function AppShell() {
         <Header
           pathname={pathname}
           onOpenBalance={() => setSheet('balance')}
+          onOpenProfile={() => setSheet('profile')}
           onGoLive={() => setSheet('connect')}
           onGoPaper={() => setSheet('balance')}
         />
@@ -78,6 +80,9 @@ export function AppShell() {
         onGoLive={() => setSheet('connect')}
       />
       <ConnectSheet open={sheet === 'connect'} onClose={close} />
+      {/* Keyed by open so the sheet re-reads the saved profile each time
+       * it opens, instead of resurrecting a stale draft. */}
+      {sheet === 'profile' && <ProfileSheet open onClose={close} />}
     </div>
   )
 }

@@ -3,6 +3,8 @@ import { WALLET } from '../../data/sample'
 import { useReel } from '../../lib/useReel'
 import { ethShort } from '../../lib/format'
 import { Wordmark } from '../brand/Wordmark'
+import { Avatar } from '../brand/Avatar'
+import { displayName, useProfile } from '../../lib/profile'
 import { Icon } from '../ui/Icon'
 import { NavRail } from './NavRail'
 import { ModeSwitch } from './ModeSwitch'
@@ -21,15 +23,18 @@ import { ModeSwitch } from './ModeSwitch'
 export function Header({
   pathname,
   onOpenBalance,
+  onOpenProfile,
   onGoLive,
   onGoPaper,
 }: {
   pathname: string
   onOpenBalance: () => void
+  onOpenProfile: () => void
   onGoLive: () => void
   onGoPaper: () => void
 }) {
   const { session } = useReel()
+  const profile = useProfile()
   return (
     <header className="border-b border-rim bg-panel/95 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-[1560px] items-center justify-between gap-3 px-3 sm:px-5">
@@ -70,6 +75,22 @@ export function Header({
               <Icon name="plus" size={16} strokeWidth={2.6} />
             </span>
             <span className="sr-only">Open wallet and balance</span>
+          </button>
+
+          {/* The account chip. It is the player's own casino chip: their
+           * pfp or initial, gold-ringed, opening the profile editor. */}
+          <button
+            type="button"
+            onClick={onOpenProfile}
+            className="key-3d grid min-h-[44px] min-w-[44px] place-items-center rounded-key border border-rim bg-panel-2 [--key-depth:3px] [--key-under:var(--color-void)]"
+          >
+            <Avatar
+              handle={displayName(profile)}
+              tint="#ffc247"
+              size={28}
+              pfp={profile.pfp || undefined}
+            />
+            <span className="sr-only">Edit your profile</span>
           </button>
         </div>
       </div>

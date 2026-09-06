@@ -1,4 +1,5 @@
 import { AppLink } from '../app/AppLink'
+import { useState } from 'react'
 import type { HistoryRow, Position } from '../data/types'
 import { CHAIN } from '../data/sample'
 import { useReel } from '../lib/useReel'
@@ -10,6 +11,9 @@ import { Tag } from '../components/ui/Tag'
 import { keyClasses } from '../components/ui/Key'
 import { TickerMark } from '../components/brand/TickerMark'
 import { Ticket } from '../components/table/Ticket'
+import { Avatar } from '../components/brand/Avatar'
+import { ProfileSheet } from '../components/shell/ProfileSheet'
+import { displayName, useProfile } from '../lib/profile'
 import { cx } from '../lib/cx'
 
 /* ------------------------------------------------------------------ *
@@ -36,6 +40,14 @@ function Outcome({ row }: { row: HistoryRow }) {
 export function Me() {
   const reel = useReel()
   const { you, session, history: HISTORY } = reel
+  const profile = useProfile()
+  const [editing, setEditing] = useState(false)
+
+  const socials = [
+    profile.x && `@${profile.x} on X`,
+    profile.telegram && `@${profile.telegram} on Telegram`,
+    profile.discord && `@${profile.discord} on Discord`,
+  ].filter(Boolean) as string[]
 
   /* The open position, live from the engine. Null when flat — the empty
    * branch below is a designed state, not a fallback. */
@@ -72,6 +84,41 @@ export function Me() {
           </div>
         }
       />
+
+      {/* ---- who this is ---- */}
+      <Panel className="mb-4" bodyClassName="p-4">
+        <div className="flex items-center gap-4">
+          <Avatar
+            handle={displayName(profile)}
+            tint="#ffc247"
+            size={56}
+            ring="gold"
+            pfp={profile.pfp || undefined}
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="truncate text-lg font-extrabold tracking-tight text-ink">
+                {displayName(profile)}
+              </span>
+              <Tag tone="gold">Demo</Tag>
+            </div>
+            <p className="mt-0.5 truncate text-xs text-ink-3">
+              {socials.length > 0
+                ? socials.join(' · ')
+                : profile.name
+                  ? 'Stored in this browser. Shown at the table, in the feed and on the board.'
+                  : 'Set a name and pfp for your seat at the table.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className={`${keyClasses('ghost', 'md')} shrink-0`}
+          >
+            Edit profile
+          </button>
+        </div>
+      </Panel>
 
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* ---- the open position ---- */}
@@ -294,6 +341,8 @@ export function Me() {
           ))}
         </ul>
       </Panel>
+
+      {editing && <ProfileSheet open onClose={() => setEditing(false)} />}
     </div>
   )
 }

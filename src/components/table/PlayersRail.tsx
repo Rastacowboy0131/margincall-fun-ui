@@ -2,6 +2,7 @@ import type { Player } from '../../data/types'
 import { signedEth, x } from '../../lib/format'
 import { Avatar } from '../brand/Avatar'
 import { Panel } from '../ui/Panel'
+import { displayName, useProfile } from '../../lib/profile'
 import { cx } from '../../lib/cx'
 
 /* ------------------------------------------------------------------ *
@@ -26,6 +27,8 @@ const STATUS: Record<Player['status'], { label: string; tone: string; ring: 'up'
 
 function Row({ player, you }: { player: Player; you?: boolean }) {
   const s = STATUS[player.status]
+  const profile = useProfile()
+  const name = you ? displayName(profile) : player.handle
   return (
     <li
       className={cx(
@@ -33,7 +36,13 @@ function Row({ player, you }: { player: Player; you?: boolean }) {
         you && 'bg-gold-wash',
       )}
     >
-      <Avatar handle={player.handle} tint={player.tint} size={30} ring={s.ring} />
+      <Avatar
+        handle={name}
+        tint={player.tint}
+        size={30}
+        ring={s.ring}
+        pfp={you ? profile.pfp || undefined : undefined}
+      />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span
@@ -42,7 +51,7 @@ function Row({ player, you }: { player: Player; you?: boolean }) {
               you ? 'text-gold' : 'text-ink',
             )}
           >
-            {you ? 'you' : player.handle}
+            {name}
           </span>
           <span className={cx('eyebrow shrink-0 text-[9px]', s.tone)}>{s.label}</span>
         </div>
@@ -63,13 +72,26 @@ function Row({ player, you }: { player: Player; you?: boolean }) {
   )
 }
 
-function Seat({ player }: { player: Player }) {
+function Seat({ player, you }: { player: Player; you?: boolean }) {
   const s = STATUS[player.status]
+  const profile = useProfile()
+  const name = you ? displayName(profile) : player.handle
   return (
     <li className="flex w-[86px] shrink-0 flex-col items-center gap-1.5 rounded-key border border-rim bg-panel px-1.5 py-2.5">
-      <Avatar handle={player.handle} tint={player.tint} size={32} ring={s.ring} />
-      <span className="w-full truncate text-center text-[10px] font-bold text-ink-2">
-        {player.handle}
+      <Avatar
+        handle={name}
+        tint={player.tint}
+        size={32}
+        ring={s.ring}
+        pfp={you ? profile.pfp || undefined : undefined}
+      />
+      <span
+        className={cx(
+          'w-full truncate text-center text-[10px] font-bold',
+          you ? 'text-gold' : 'text-ink-2',
+        )}
+      >
+        {name}
       </span>
       <span
         className={cx(
@@ -151,8 +173,8 @@ export function PlayersRail({
           <Empty />
         ) : (
           <ul className="rail flex gap-2 pb-1">
-            {seats.map((p) => (
-              <Seat key={p.handle} player={p} />
+            {seats.map((p, i) => (
+              <Seat key={p.handle} player={p} you={i === 0 && you !== null} />
             ))}
           </ul>
         )}

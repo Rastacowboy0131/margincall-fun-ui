@@ -6,6 +6,7 @@ import { PageHead } from '../components/shell/PageHead'
 import { Avatar } from '../components/brand/Avatar'
 import { Panel } from '../components/ui/Panel'
 import { Tag } from '../components/ui/Tag'
+import { displayName, useProfile } from '../lib/profile'
 import { cx } from '../lib/cx'
 
 /* ------------------------------------------------------------------ *
@@ -55,6 +56,8 @@ const METAL = [
 
 function Step({ row, place, atLabel }: { row: LeaderRow; place: number; atLabel: string }) {
   const m = METAL[place]
+  const profile = useProfile()
+  const name = row.isYou ? displayName(profile) : row.handle
   // Visual order on the podium is 2nd, 1st, 3rd; source order stays 1,2,3.
   const order = place === 0 ? 'order-2' : place === 1 ? 'order-1' : 'order-3'
   return (
@@ -65,13 +68,14 @@ function Step({ row, place, atLabel }: { row: LeaderRow; place: number; atLabel:
        * out of step with the other two. */}
       <div className="mb-2 flex h-[104px] w-full flex-col items-center justify-end gap-1.5">
         <Avatar
-          handle={row.handle}
+          handle={name}
           tint={row.tint}
           size={place === 0 ? 50 : 40}
           ring={place === 0 ? 'gold' : undefined}
+          pfp={row.isYou ? profile.pfp || undefined : undefined}
         />
         <span className="w-full truncate px-1 text-center text-xs font-bold text-ink">
-          {row.isYou ? 'you' : row.handle}
+          {name}
         </span>
         {row.tag && <Tag tone="gold">{row.tag}</Tag>}
       </div>
@@ -104,6 +108,7 @@ function Step({ row, place, atLabel }: { row: LeaderRow; place: number; atLabel:
 
 export function Board() {
   const [key, setKey] = useState<BoardKey>('wins')
+  const profile = useProfile()
   const board = BOARDS[key]
   const top = board.rows.slice(0, 3)
   const rest = board.rows.slice(3)
@@ -171,7 +176,12 @@ export function Board() {
                 )}
               >
                 <span className="nums w-5 shrink-0 text-sm font-bold text-ink-3">{row.rank}</span>
-                <Avatar handle={row.handle} tint={row.tint} size={28} />
+                <Avatar
+                  handle={row.isYou ? displayName(profile) : row.handle}
+                  tint={row.tint}
+                  size={28}
+                  pfp={row.isYou ? profile.pfp || undefined : undefined}
+                />
                 {/* Handles are real and long. The numeric columns are
                  * kept narrow so the name gets the remaining width
                  * rather than being cut to four characters. */}
@@ -182,7 +192,7 @@ export function Board() {
                       row.isYou ? 'text-gold' : 'text-ink',
                     )}
                   >
-                    {row.isYou ? 'you' : row.handle}
+                    {row.isYou ? displayName(profile) : row.handle}
                   </span>
                   {row.tag && <Tag tone="gold">{row.tag}</Tag>}
                 </span>

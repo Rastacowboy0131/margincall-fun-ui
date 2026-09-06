@@ -2,6 +2,7 @@ import type { Activity } from '../../data/types'
 import { signedEth, x } from '../../lib/format'
 import { Avatar } from '../brand/Avatar'
 import { Panel } from '../ui/Panel'
+import { displayName, useProfile } from '../../lib/profile'
 import { cx } from '../../lib/cx'
 
 /* The live feed. Who just got out, who just got in, who just got taken.
@@ -18,14 +19,20 @@ const ACTION: Record<Activity['action'], { verb: string; tone: string }> = {
 function Row({ item }: { item: Activity }) {
   const a = ACTION[item.action]
   const you = item.handle === 'you'
+  const profile = useProfile()
   return (
     <li className={cx('flex flex-col gap-0.5 px-3 py-2', you && 'bg-gold-wash')}>
       <div className="flex items-center gap-2">
-        <Avatar handle={item.handle} tint={item.tint} size={22} />
+        <Avatar
+          handle={you ? displayName(profile) : item.handle}
+          tint={item.tint}
+          size={22}
+          pfp={you ? profile.pfp || undefined : undefined}
+        />
         <span
           className={cx('min-w-0 flex-1 truncate text-xs font-bold', you ? 'text-gold' : 'text-ink')}
         >
-          {you ? 'you' : item.handle}
+          {you ? displayName(profile) : item.handle}
         </span>
         <span
           className={cx(
