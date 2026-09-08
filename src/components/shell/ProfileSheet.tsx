@@ -17,7 +17,7 @@ import { Sheet } from '../ui/Sheet'
 /* The profile editor. Stored in this browser and printed wherever the
  * local player appears. */
 
-const YOU_TINT = '#ffcf5a'
+const YOU_TINT = '#2a3128'
 
 const SOCIALS: { key: 'x' | 'telegram' | 'discord'; label: string; placeholder: string }[] = [
   { key: 'x', label: 'X', placeholder: 'handle' },
@@ -112,7 +112,7 @@ export function ProfileSheet({ open, onClose }: { open: boolean; onClose: () => 
       </div>
 
       <div className="mt-5 flex items-center gap-2">
-        <Button variant="go" size="md" className="flex-1" onClick={() => { saveProfile(draft); onClose() }}>
+        <Button variant="lime" size="md" className="flex-1" onClick={() => { saveProfile(draft); onClose() }}>
           Save profile
         </Button>
         <Button variant="quiet" size="md" onClick={() => { saveProfile(EMPTY_PROFILE); setDraft(EMPTY_PROFILE); setPfpError('') }}>

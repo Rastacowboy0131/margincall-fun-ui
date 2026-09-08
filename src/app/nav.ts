@@ -1,15 +1,19 @@
-/* The product's destinations, in one list. Four is what a labelled tab
- * bar carries at 360px. Fairness is reached from the sky itself. */
+/* The product's destinations. Six tabs in the header; the phone's tab
+ * bar carries five and reaches referrals from the rewards page. */
 
 export interface Destination {
   href: string
   label: string
-  icon: 'play' | 'me' | 'board' | 'rewards'
+  icon: 'trade' | 'portfolio' | 'history' | 'leaderboard' | 'rewards' | 'referrals'
+  /** Shown in the phone tab bar. */
+  mobile: boolean
 }
 
 export const DESTINATIONS: Destination[] = [
-  { href: '/', label: 'Launch', icon: 'play' },
-  { href: '/board', label: 'Board', icon: 'board' },
-  { href: '/me', label: 'Me', icon: 'me' },
-  { href: '/rewards', label: 'Rewards', icon: 'rewards' },
+  { href: '/', label: 'Trade', icon: 'trade', mobile: true },
+  { href: '/portfolio', label: 'Portfolio', icon: 'portfolio', mobile: true },
+  { href: '/history', label: 'History', icon: 'history', mobile: true },
+  { href: '/leaderboard', label: 'Leaderboard', icon: 'leaderboard', mobile: true },
+  { href: '/rewards', label: 'Rewards', icon: 'rewards', mobile: true },
+  { href: '/referrals', label: 'Referrals', icon: 'referrals', mobile: false },
 ]

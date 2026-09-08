@@ -40,7 +40,7 @@ export function BalanceSheet({ open, onClose, onGoLive }: {
       }
     >
       <div className="mb-4 flex items-center gap-2">
-        <Tag tone={live ? 'up' : 'quiet'}>{live ? 'Live, on chain' : 'Paper'}</Tag>
+        <Tag tone={live ? 'lime' : 'quiet'}>{live ? 'Live, on chain' : 'Paper'}</Tag>
         {live && <span className="num text-xs text-ink-3">{addrShort}</span>}
       </div>
 
@@ -59,7 +59,7 @@ export function BalanceSheet({ open, onClose, onGoLive }: {
 
       {!live && (
         <>
-          <Button variant="go" size="xl" full className="mt-4" onClick={onGoLive}>
+          <Button variant="lime" size="xl" full className="mt-4" onClick={onGoLive}>
             Go live on {CHAIN.networkName}
           </Button>
           <div className="mt-5 border-t border-line pt-4">

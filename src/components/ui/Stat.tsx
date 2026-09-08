@@ -1,19 +1,13 @@
 import type { ReactNode } from 'react'
 import { cx } from '../../lib/cx'
 
-export function Stat({ label, value, note, tone = 'ink', hero = false }: {
-  label: string
-  value: ReactNode
-  note?: ReactNode
-  tone?: 'ink' | 'up' | 'down' | 'gold'
-  hero?: boolean
-}) {
-  const t = tone === 'up' ? 'text-up' : tone === 'down' ? 'text-down' : tone === 'gold' ? 'text-gold' : 'text-ink'
+export function Stat({ label, value, note, tone = 'ink', hero = false }: { label: string; value: ReactNode; note?: ReactNode; tone?: 'ink' | 'up' | 'down' | 'amber'; hero?: boolean }) {
+  const t = tone === 'up' ? 'text-lime' : tone === 'down' ? 'text-down' : tone === 'amber' ? 'text-amber' : 'text-ink'
   return (
     <div className="flex flex-col justify-between p-4">
       <span className="label">{label}</span>
-      <span className={cx('display mt-3 leading-none tracking-tight', hero ? 'text-5xl font-extrabold' : 'text-3xl font-bold', t)}>{value}</span>
-      {note && <span className="mt-2 text-xs text-ink-3">{note}</span>}
+      <span className={cx('num mt-2.5 leading-none font-bold tracking-tight whitespace-nowrap', hero ? 'text-2xl sm:text-3xl' : 'text-lg sm:text-xl', t)}>{value}</span>
+      {note && <span className="mt-1.5 text-xs text-ink-3">{note}</span>}
     </div>
   )
 }

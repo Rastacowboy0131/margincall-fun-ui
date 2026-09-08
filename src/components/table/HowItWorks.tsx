@@ -1,40 +1,30 @@
 import { CHAIN } from '../../data/sample'
-import { useRevealOnce } from '../../lib/useRevealOnce'
-import { cx } from '../../lib/cx'
-
-/* The flight briefing. Five steps, each docking in on its own delay
- * the first time it scrolls into view. */
+import { AppLink } from '../../app/AppLink'
 
 const STEPS = [
-  { title: 'A flight opens', body: 'Every few seconds the house opens a leveraged position on a tokenised stock. 20x long NVDAx, 25x long TSLAx, the ticker rotates. It lifts off at 1.00x.' },
-  { title: 'The path moves like a chart', body: 'Dips, pumps, stalls. Not an escalator. The whole flight path comes from one seed committed before launch.' },
-  { title: 'Board whenever you like', body: 'On the pad or halfway up. Wherever you board becomes your 1.00x, so boarding a dip and ejecting on the rip is a real strategy.' },
-  { title: 'Eject before the call', body: 'Your payout is the exit altitude divided by where you boarded. The moment the flight is lost is hidden until it happens. Some go down in three seconds; some run for minutes.' },
-  { title: 'Next launch in five', body: 'Explosion, new ticker, new flight. Board during the countdown and you lift off at 1.00x.' },
+  { title: 'A position opens', body: `Every round is a leveraged stock position on ${CHAIN.networkName}. 20x LONG NVDAx, 25x LONG TSLAx, the ticker rotates. Price starts at 1.00x.` },
+  { title: 'The chart moves like a real chart', body: 'Up candles, down candles, dips, pumps. Not an escalator. The whole path is derived from a committed seed.' },
+  { title: 'BUY any time', body: 'Enter at the current price whenever you want, mid-round included. Buy the dip, sell the rip, buy back in again. Payout = sell price ÷ your entry.' },
+  { title: 'SELL before the call', body: 'Hit cash out to lock in. The rug tick is hidden and provably fair. Some rounds die in 3 seconds, some run minutes. Anyone still holding at the margin call loses the position.' },
+  { title: 'Next position in 5s', body: 'Liquidation flash, new ticker, new round. Queue a buy during the intermission to fill at the 1.00x open.' },
 ]
 
 export function HowItWorks() {
-  const { ref, shown } = useRevealOnce<HTMLOListElement>()
   return (
-    <section className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:py-20">
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <div>
-          <h2 className="display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">Flight briefing</h2>
-          <p className="mt-3 max-w-[40ch] text-[15px] text-ink-2">It is a leveraged position, not a slot machine. That distinction is the entire game.</p>
-          <p className="num mt-6 text-xs text-ink-3">edge {CHAIN.houseEdgePct}% / cap {CHAIN.maxPayoutX}x / median flight {CHAIN.medianRoundSecLow}-{CHAIN.medianRoundSecHigh}s</p>
-        </div>
-        <ol ref={ref} className="flex flex-col gap-3">
-          {STEPS.map((s, i) => (
-            <li key={s.title} className={cx('grid grid-cols-[56px_1fr] gap-4 rounded-card border border-line bg-gradient-to-b from-surface-2 to-surface p-5', shown ? 'anim-dock' : 'opacity-0')} style={{ animationDelay: `${i * 80}ms` }}>
-              <span aria-hidden="true" className="display text-3xl font-extrabold text-cyan">{String(i + 1).padStart(2, '0')}</span>
-              <div>
-                <h3 className="text-lg font-semibold text-ink">{s.title}</h3>
-                <p className="mt-1 max-w-[62ch] text-sm leading-relaxed text-ink-2">{s.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
+    <section id="how" className="mx-auto max-w-[1560px] px-4 py-12 sm:px-6 lg:py-16">
+      <h2 className="display text-4xl leading-none tracking-wide sm:text-5xl"><span className="text-ink">How it </span><span className="text-lime">works</span></h2>
+      <ol className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {STEPS.map((s, i) => (
+          <li key={s.title} className="card anim-rise flex flex-col p-5" style={{ animationDelay: `${i * 60}ms` }}>
+            <span aria-hidden="true" className="num mb-3 grid size-7 place-items-center rounded-[6px] bg-lime text-xs font-extrabold text-bg">{i + 1}</span>
+            <h3 className="text-[15px] font-bold text-ink">{s.title}</h3>
+            <p className="mt-2 text-[13px] leading-relaxed text-ink-2">{s.body}</p>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-6 max-w-[100ch] text-[13px] leading-relaxed text-ink-3">
+        Fairness: the entire price path and the rug tick are derived from a committed server seed revealed after each round (<AppLink to="/verify" className="text-lime underline underline-offset-4">verify</AppLink>). House edge is {CHAIN.houseEdgePct}%, stated openly. Median round runs {CHAIN.medianRoundSecLow}-{CHAIN.medianRoundSecHigh}s with a fat tail. Winnings capped at {CHAIN.maxPayoutX}x per position.
+      </p>
     </section>
   )
 }
