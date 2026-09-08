@@ -3,11 +3,13 @@
  * address, chain id and endpoint live mode touches. Same rule as
  * margincall-ui's lib/chain-config.js: nothing else hardcodes these.
  *
- * Currently pointed at the Robinhood Chain TESTNET deploy
- * (contracts repo DEPLOYMENTS.md, no-min-stake build 2026-09-06).
+ * Currently pointed at the Robinhood Chain TESTNET deploy: the UUPS
+ * ERC1967 PROXY address (contracts repo DEPLOYMENTS.md, 2026-09-08).
+ * The proxy address is permanent across upgrades; the implementation
+ * behind it can change, so never hardcode an implementation address.
  * ------------------------------------------------------------------ */
 
-export const CONTRACT_ADDRESS = '0x9ba7baff650080ca55b0e68550b18e45bf096cb0' as const
+export const CONTRACT_ADDRESS = '0x9ef19537540f36C8CF7AD69372399B1ED43BD591' as const
 
 /** Operator service (railway): ws feed, tick signing, round state. */
 export const OPERATOR_HTTP = 'https://margincall-operator-production.up.railway.app'
