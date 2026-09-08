@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Margin Call · Sticker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #fff6e5; --card: #ffffff; --ink: #1a1523; --ink2: #5d5670; --ink3: #9a93aa;
+    --lime: #a6f24a; --mint: #6ee7c8; --sky: #7cc8ff; --lemon: #ffd83d; --coral: #ff6b6b; --pink: #ff5fa8; --grape: #b58cff;
+    --disp: 'Lilita One', 'Arial Black', sans-serif; --sans: 'Nunito', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-weight: 700; }
+  body { min-height: 100dvh; background-image: radial-gradient(var(--lemon) 1.6px, transparent 1.7px), radial-gradient(var(--sky) 1.6px, transparent 1.7px); background-size: 34px 34px; background-position: 0 0, 17px 17px; }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  .disp { font-family: var(--disp); font-weight: 400; }
+  .stk { background: var(--card); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 6px 6px 0 var(--ink); }
+
+  header { display: flex; align-items: center; gap: 22px; height: 68px; padding: 0 22px; background: #fff; border-bottom: 3px solid var(--ink); }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand .logo { width: 38px; height: 38px; border-radius: 12px; background: var(--coral); border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); display: grid; place-items: center; transform: rotate(-8deg); }
+  .brand .logo i { display: block; width: 8px; height: 20px; background: #fff; border: 2px solid var(--ink); border-radius: 3px; }
+  .brand .name { font-family: var(--disp); font-size: 24px; letter-spacing: .5px; }
+  .brand .name b { color: var(--coral); -webkit-text-stroke: 1px var(--ink); font-weight: 400; }
+  nav { display: flex; gap: 6px; }
+  nav a { padding: 8px 14px; border-radius: 999px; color: var(--ink2); text-decoration: none; font-weight: 800; font-size: 14px; transition: transform .15s; }
+  nav a.on { background: var(--lemon); border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); color: var(--ink); }
+  nav a:hover { transform: rotate(-3deg) scale(1.05); }
+  .wallet { margin-left: auto; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; border-radius: 999px; background: var(--card); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+  .wallet .v { font-family: var(--disp); font-size: 20px; }
+  .wallet .v.flash-up { animation: bump .6s cubic-bezier(.34,1.56,.64,1); color: #1c9c5b; } .wallet .v.flash-down { animation: bump .6s cubic-bezier(.34,1.56,.64,1); color: var(--coral); }
+  @keyframes bump { 30% { transform: scale(1.25) rotate(-4deg); } }
+  .wallet .coin { width: 30px; height: 30px; border-radius: 50%; background: var(--lemon); border: 3px solid var(--ink); display: grid; place-items: center; font-family: var(--disp); font-size: 14px; }
+  .me { width: 42px; height: 42px; border-radius: 50%; background: var(--grape); border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); display: grid; place-items: center; font-family: var(--disp); color: #fff; -webkit-text-stroke: 1px var(--ink); }
+
+  .ribbon { display: flex; align-items: center; gap: 10px; padding: 12px 22px; overflow: hidden; }
+  .ribbon .lbl { font-size: 12px; font-weight: 900; color: var(--ink2); text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
+  .pill { font-family: var(--disp); font-size: 16px; padding: 4px 12px; border-radius: 999px; border: 3px solid var(--ink); background: #fff; flex-shrink: 0; box-shadow: 3px 3px 0 var(--ink); }
+  .pill.dust { background: #e9e4f5; color: var(--ink2); }
+  .pill.ok { background: var(--mint); }
+  .pill.big { background: var(--lemon); }
+  .pill.monster { background: var(--pink); color: #fff; -webkit-text-stroke: 1px var(--ink); transform: rotate(-4deg); }
+  .pill.live { background: var(--ink); color: #fff; }
+  .pill.live.called { background: var(--coral); }
+  .pill.new { animation: slap .4s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes slap { from { transform: scale(2) rotate(12deg); opacity: 0; } }
+  .ribbon .pills { display: flex; gap: 10px; }
+  .ribbon .pills .pill:nth-child(odd) { transform: rotate(2deg); } .ribbon .pills .pill:nth-child(even) { transform: rotate(-2deg); }
+
+  main { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 20px; padding: 6px 22px 30px; max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+
+  .board { position: relative; min-height: 480px; overflow: hidden; background: #fff; }
+  .board.jolt { animation: jolt .45s ease-out both; }
+  @keyframes jolt { 20% { transform: translate(-9px, 4px) rotate(-1deg); } 45% { transform: translate(8px, -3px) rotate(1deg); } 70% { transform: translate(-3px, 1px); } }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .hud { position: absolute; z-index: 3; }
+  .hud.tl { top: 16px; left: 18px; display: flex; align-items: center; gap: 10px; }
+  .tmark { width: 40px; height: 40px; border-radius: 12px; border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); display: grid; place-items: center; font-family: var(--disp); font-size: 14px; transform: rotate(-6deg); }
+  .hud .sym { font-family: var(--disp); font-size: 20px; }
+  .hud .sub { font-size: 12px; color: var(--ink2); font-weight: 800; }
+  .hud.tr { top: 16px; right: 18px; display: flex; gap: 8px; }
+  .tag { font-size: 12px; font-weight: 900; padding: 5px 10px; border-radius: 999px; border: 3px solid var(--ink); background: #fff; box-shadow: 2px 2px 0 var(--ink); }
+  .tag.live { background: var(--lime); } .tag.over { background: var(--coral); color: #fff; }
+  .multwrap { position: absolute; z-index: 3; left: 0; right: 0; top: 70px; text-align: center; pointer-events: none; }
+  .mult { font-family: var(--disp); font-size: clamp(72px, 13vw, 150px); line-height: 1; -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; color: var(--mint); text-shadow: 8px 8px 0 var(--ink); transition: color .3s, transform .15s; display: inline-block; animation: breathe 1.6s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: scale(1.03) rotate(-1deg); } }
+  .mult.c2 { color: var(--lemon); } .mult.c3 { color: var(--pink); } .mult.c4 { color: var(--grape); animation: wob .4s ease-in-out infinite; }
+  @keyframes wob { 25% { transform: rotate(-3deg) scale(1.05);} 75% { transform: rotate(3deg) scale(1.05);} }
+  .mult.down { color: var(--coral); animation: none; }
+  .mult .x { font-size: .5em; }
+  .status { font-size: 15px; font-weight: 800; color: var(--ink2); margin-top: 8px; }
+  .status b { color: var(--ink); background: var(--lemon); padding: 0 6px; border-radius: 6px; border: 2px solid var(--ink); }
+  .ready { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; text-align: center; background: rgba(255,255,255,.7); }
+  .ready .n { font-family: var(--disp); font-size: 160px; line-height: 1; -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill; color: var(--lemon); text-shadow: 10px 10px 0 var(--ink); }
+  .ready .n.tick { animation: slap .45s cubic-bezier(.34,1.56,.64,1) both; }
+  .ready .t { font-family: var(--disp); font-size: 26px; margin-top: 10px; }
+  .ready .s { font-weight: 800; color: var(--ink2); }
+  .bonk { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; pointer-events: none; }
+  .bonk .burst { width: 360px; height: 360px; background: var(--coral); border: 4px solid var(--ink); clip-path: polygon(50% 0%, 61% 25%, 88% 12%, 78% 38%, 100% 50%, 78% 62%, 88% 88%, 61% 75%, 50% 100%, 39% 75%, 12% 88%, 22% 62%, 0% 50%, 22% 38%, 12% 12%, 39% 25%); display: grid; place-items: center; animation: slap .35s cubic-bezier(.34,1.56,.64,1) both, spinout 2.4s ease-in .3s both; }
+  @keyframes spinout { 80% { opacity: 1; transform: rotate(6deg) scale(1);} 100% { opacity: 0; transform: rotate(-30deg) scale(.2); } }
+  .bonk .word { font-family: var(--disp); font-size: 64px; color: #fff; -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; transform: rotate(-8deg); text-shadow: 5px 5px 0 var(--ink); }
+  .bonk .word small { display: block; font-size: 20px; text-align: center; }
+  .sticker-win { position: absolute; z-index: 5; left: 50%; top: 40%; transform: translate(-50%,-50%) rotate(-8deg); font-family: var(--disp); font-size: 44px; background: var(--lime); border: 4px solid var(--ink); border-radius: 18px; padding: 10px 24px; box-shadow: 8px 8px 0 var(--ink); animation: slap .4s cubic-bezier(.34,1.56,.64,1) both, fade .5s ease-in 1.4s both; pointer-events: none; white-space: nowrap; }
+  @keyframes fade { to { opacity: 0; transform: translate(-50%,-80%) rotate(-8deg); } }
+  .confetti { position: absolute; z-index: 6; width: 12px; height: 12px; border: 2px solid var(--ink); animation: fall 1.6s ease-in both; pointer-events: none; }
+  @keyframes fall { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(var(--dx), 420px) rotate(720deg); opacity: 0; } }
+
+  .deck { margin-top: 20px; display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; padding: 16px 18px; background: var(--sky); }
+  @media (max-width: 760px) { .deck { grid-template-columns: 1fr; } }
+  .lbl { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--ink); }
+  .chips { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .chip { font-family: var(--disp); font-size: 18px; padding: 8px 18px; border-radius: 999px; border: 3px solid var(--ink); background: #fff; box-shadow: 4px 4px 0 var(--ink); transition: transform .1s, box-shadow .1s, background .15s; }
+  .chip:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--ink); }
+  .chip:active, .chip.on { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--ink); }
+  .chip.on { background: var(--lemon); }
+  .chip.max { background: var(--pink); color: #fff; -webkit-text-stroke: 1px var(--ink); }
+  .autos { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+  .autos .chip { font-size: 14px; padding: 5px 12px; }
+  .autos .chip.on { background: var(--mint); }
+  .go { position: relative; min-width: 240px; padding: 18px 26px; border-radius: 26px; border: 4px solid var(--ink); background: var(--lime); box-shadow: 8px 8px 0 var(--ink); font-family: var(--disp); font-size: 34px; line-height: 1; transition: transform .1s, box-shadow .1s, background .2s; text-align: left; }
+  .go small { display: block; font-family: var(--sans); font-weight: 900; font-size: 13px; margin-top: 6px; color: var(--ink2); }
+  .go:hover { transform: translate(-2px,-2px); box-shadow: 10px 10px 0 var(--ink); }
+  .go:active { transform: translate(6px,6px) scale(.98); box-shadow: 2px 2px 0 var(--ink); }
+  .go.sell { background: var(--pink); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; animation: jelly 1s ease-in-out infinite; }
+  .go.sell small { color: #fff; -webkit-text-stroke: 0; }
+  @keyframes jelly { 50% { transform: scale(1.03, .97); } }
+  .go:disabled { background: #e6e1f0; color: var(--ink3); box-shadow: 8px 8px 0 #b9b3c8; border-color: #b9b3c8; animation: none; cursor: not-allowed; -webkit-text-stroke: 0; }
+  .float { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); font-family: var(--disp); font-size: 26px; color: #1c9c5b; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; animation: floatUp 1.4s ease-out both; pointer-events: none; white-space: nowrap; }
+  @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -14px) scale(1.2) rotate(-6deg); } 100% { opacity: 0; transform: translate(-50%, -90px) rotate(6deg); } }
+  .pos { margin-top: 16px; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 12px 16px; background: var(--lemon); transform: rotate(-.6deg); animation: slap .35s cubic-bezier(.34,1.56,.64,1) both; }
+  .pos.dead { background: var(--coral); color: #fff; animation: slap .35s both, fall2 .6s ease-in 1.2s both; }
+  @keyframes fall2 { to { transform: translateY(60px) rotate(8deg); opacity: 0; } }
+  .pos.won { background: var(--mint); }
+  .pos .big { font-family: var(--disp); font-size: 26px; }
+  .pos .k { font-size: 12px; font-weight: 900; text-transform: uppercase; opacity: .7; }
+  .stamp { font-family: var(--disp); font-size: 20px; padding: 2px 10px; border: 3px solid var(--ink); border-radius: 8px; transform: rotate(-6deg); background: #fff; color: var(--ink); }
+
+  aside { display: flex; flex-direction: column; gap: 18px; }
+  .box h2 { margin: 0; font-family: var(--disp); font-size: 18px; padding: 12px 16px; border-bottom: 3px solid var(--ink); display: flex; justify-content: space-between; align-items: center; background: var(--grape); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; border-radius: 15px 15px 0 0; }
+  .box h2 span { background: #fff; color: var(--ink); -webkit-text-stroke: 0; font-family: var(--sans); font-weight: 900; font-size: 12px; border: 2px solid var(--ink); border-radius: 999px; padding: 2px 9px; }
+  .rows { max-height: 320px; overflow: auto; scrollbar-width: none; }
+  .row { display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: center; padding: 8px 14px; border-bottom: 2px dashed #e6e1f0; font-size: 13px; animation: rowin .3s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes rowin { from { opacity: 0; transform: translateX(-14px) rotate(-3deg);} }
+  .row.you { background: #fff8d6; }
+  .row .av { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--ink); display: grid; place-items: center; font-family: var(--disp); color: #fff; -webkit-text-stroke: 1px var(--ink); font-size: 13px; }
+  .row .h { font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .s { font-size: 10px; font-weight: 900; padding: 1px 6px; border-radius: 999px; border: 2px solid var(--ink); margin-left: 6px; }
+  .row .s.in { background: var(--lemon);} .row .s.out { background: var(--mint);} .row .s.called { background: var(--coral); color: #fff; }
+  .row .sub { font-size: 11px; color: var(--ink3); font-weight: 800; }
+  .row .pnl { font-family: var(--disp); font-size: 17px; }
+  .row .pnl.g { color: #1c9c5b; } .row .pnl.r { color: var(--coral); }
+  .log .row { grid-template-columns: 1fr auto; }
+  .bub { display: inline-block; background: #f3f0fa; border: 2px solid var(--ink); border-radius: 12px 12px 12px 3px; padding: 4px 10px; font-weight: 800; }
+  .bub.v { background: var(--mint);} .bub.c { background: var(--coral); color: #fff; } .bub.b { background: var(--sky); }
+  .empty { padding: 26px 14px; text-align: center; font-weight: 800; color: var(--ink3); }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo"><i></i></span><span class="name">MARGIN <b>CALL</b></span></div>
+  <nav><a class="on" href="#">Play</a><a href="#">Board</a><a href="#">Me</a><a href="#">Rewards</a></nav>
+  <div class="wallet"><span class="v" id="bal">10,000.00</span><span style="font-weight:900;font-size:12px;color:var(--ink2)">ETH</span><span class="coin">+</span></div>
+  <div class="me">Y</div>
+</header>
+<div class="ribbon"><span class="lbl">Last rounds</span><span class="pill live" id="livepill">next</span><span class="pills" id="pills"></span></div>
+
+<main>
+  <section>
+    <div class="board stk" id="board">
+      <canvas id="c"></canvas>
+      <div class="hud tl"><span class="tmark" id="tmark">NV</span><div><div class="sym" id="sym">NVDAx <span style="font-size:14px;color:var(--ink2)">20x long</span></div><div class="sub" id="sub">NVIDIA · round #4417</div></div></div>
+      <div class="hud tr"><span class="tag" id="clock">0:00</span><span class="tag live" id="ptag">LIVE</span></div>
+      <div class="multwrap" id="multwrap"><div class="mult" id="mult">1.00<span class="x">x</span></div><div class="status" id="status">Tap BUY to hop on</div></div>
+      <div class="ready" id="ready" hidden><div><div class="n" id="cnt">4</div><div class="t">Next round starting!</div><div class="s">Queue a buy now and you fill at 1.00x</div></div></div>
+      <div id="fx"></div>
+    </div>
+
+    <div class="deck stk">
+      <div>
+        <div class="lbl">Your stake</div>
+        <div class="chips">
+          <button class="chip" data-v="0.1">0.1</button><button class="chip on" data-v="0.5">0.5</button><button class="chip" data-v="1">1</button><button class="chip" data-v="5">5</button><button class="chip max" data-v="25">MAX</button>
+        </div>
+        <div class="lbl" style="margin-top:12px">Auto-sell at</div>
+        <div class="autos" id="autos"><button class="chip" data-a="1.5">1.5x</button><button class="chip" data-a="2">2x</button><button class="chip" data-a="3">3x</button><button class="chip" data-a="5">5x</button><button class="chip" data-a="10">10x</button></div>
+      </div>
+      <div style="position:relative"><button class="go" id="go">BUY<small>0.5 ETH · your entry becomes 1.00x</small></button><div id="floats"></div></div>
+    </div>
+    <div id="posbox"></div>
+  </section>
+
+  <aside>
+    <div class="box stk"><h2>At the table <span id="watch">120 here</span></h2><div class="rows" id="players"></div></div>
+    <div class="box stk log"><h2>Chatter</h2><div class="rows" id="feed"><div class="empty">Quiet... nobody has moved yet</div></div></div>
+  </aside>
+</main>
+
+<script>/* Shared mock engine: same maths as the real one (random walk with momentum,
+   exponential rug time), bots, feed, a paper account and you. */
+window.MC = (function () {
+  const TICK = 50, INTER = 4000, CALLED = 2800;
+  const TICKERS = [
+    { s: 'NVDAx', n: 'NVIDIA', m: 'NV', c: '#76b900', lev: 20 },
+    { s: 'TSLAx', n: 'Tesla', m: 'TS', c: '#e31937', lev: 25 },
+    { s: 'GMEx', n: 'GameStop', m: 'GM', c: '#e4002b', lev: 5 },
+    { s: 'HOODx', n: 'Robinhood', m: 'HD', c: '#9dff3f', lev: 20 },
+    { s: 'AMZNx', n: 'Amazon', m: 'AM', c: '#ff9900', lev: 5 },
+    { s: 'AAPLx', n: 'Apple', m: 'AA', c: '#a1a1a6', lev: 5 },
+  ];
+  const NAMES = ['rughunter', 'thetagang', 'cathiewood2', 'shortking', 'papertrader', 'fomo_frank', 'wsb_refugee', 'hoodlum', 'marginqueen', '0xdead', 'larry_liq', 'dianafan', 'gmi_gary', 'sofia', 'baghold_bob'];
+  const TINTS = ['#7c5cff', '#1fb6a6', '#3ba55d', '#3d7bd9', '#8b5cf6', '#14b8a6', '#22c55e', '#c2751b', '#be185d', '#db2777', '#0ea5e9', '#2563eb', '#f59e0b', '#ef4444', '#64748b'];
+  const g = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  function rugSecs() { if (Math.random() < 0.08) return 2 + Math.random() * 2.5; return Math.min(80, 5 + -Math.log(1 - Math.random()) * 14); }
+  function genPath(secs) { const n = Math.ceil(secs * 1000 / TICK); const p = []; let price = 1, mom = 0; for (let i = 0; i < n; i++) { mom = mom * 0.93 + g() * 0.0035; let r = 0.00075 + mom + g() * 0.0028; if (Math.random() < 0.018) r += (Math.random() - 0.42) * 0.055; price = Math.max(0.05, price * (1 + r)); p.push(price); } return p; }
+  const S = {
+    phase: 'intermission', round: 4417, ti: 0, ticker: TICKERS[0], x: 1, path: [], hist: [], idx: 0, phaseEnds: 0, opensIn: 4,
+    results: [], players: [], feed: [], balance: 10000, stake: 0.5, you: { status: 'idle', entry: null, exit: null, stake: 0 }, rugAt: null, elapsed: 0, watching: 120, lastEvent: null,
+  };
+  const subs = new Set();
+  function emit() { subs.forEach(f => f(S)); S.lastEvent = null; }
+  function feed(handle, tint, action, at, pnl) { S.feed.unshift({ id: Math.random(), handle, tint, action, at, pnl, t: Date.now() }); S.feed.length = Math.min(S.feed.length, 14); }
+  function makeBots() { const n = 6 + Math.floor(Math.random() * 6); const idx = [...NAMES.keys()].sort(() => Math.random() - 0.5).slice(0, n); return idx.map(i => ({ handle: NAMES[i], tint: TINTS[i], stake: +rnd(0.05, 1.5).toFixed(2), target: Math.random() < 0.12 ? Infinity : Math.random() < 0.15 ? rnd(4, 12) : 1.05 + Math.random() * Math.random() * 3, panic: Math.random() < 0.4 ? rnd(0.45, 0.8) : 0, delay: Math.random() < 0.35 ? rnd(0, 900) : rnd(1000, 15000), entry: null, at: 1, pnl: 0, status: 'waiting' })); }
+  function intermission() { const now = performance.now(); S.hist = S.path.slice(0, S.idx + 1); S.round += 1; S.ti = (S.ti + 1) % TICKERS.length; S.ticker = TICKERS[S.ti]; S.path = genPath(rugSecs()); S.idx = 0; S.phase = 'intermission'; S.phaseEnds = now + INTER; S.x = 1; S.rugAt = null; S.players = makeBots(); S.watching = 90 + Math.floor(Math.random() * 60); if (S.you.status === 'out' || S.you.status === 'called') S.you = { status: 'idle', entry: null, exit: null, stake: 0 }; S.lastEvent = 'intermission'; }
+  function live() { S.phase = 'live'; S.liveStart = performance.now(); S.x = 1; S.hist = []; if (S.you.status === 'queued') { S.you.status = 'in'; S.you.entry = 1; feed('you', '#ffd166', 'bought', 1, null); } S.lastEvent = 'open'; }
+  function call() { S.phase = 'called'; S.rugAt = S.x; S.results.unshift({ round: S.round, x: S.x, t: S.ticker.s }); S.results.length = Math.min(S.results.length, 12); S.phaseEnds = performance.now() + CALLED; for (const b of S.players) if (b.status === 'in') { b.status = 'called'; b.at = S.x; b.pnl = -b.stake; feed(b.handle, b.tint, 'called', S.x, -b.stake); } if (S.you.status === 'in') { feed('you', '#ffd166', 'called', S.x, -S.you.stake); S.you.status = 'called'; S.you.pnl = -S.you.stake; } if (S.you.status === 'queued') { S.balance += S.you.stake; S.you = { status: 'idle', entry: null, exit: null, stake: 0 }; } S.lastEvent = 'called'; }
+  function tick() {
+    const now = performance.now();
+    if (S.phase === 'intermission') { S.opensIn = Math.max(1, Math.ceil((S.phaseEnds - now) / 1000)); if (now >= S.phaseEnds) live(); emit(); return; }
+    if (S.phase === 'live') {
+      const el = now - S.liveStart; S.elapsed = el / 1000; const i = Math.floor(el / TICK);
+      if (i >= S.path.length) { call(); emit(); return; }
+      S.idx = i; S.x = S.path[i]; S.hist.push(S.x);
+      for (const b of S.players) { if (b.status === 'waiting' && el >= b.delay) { b.status = 'in'; b.entry = S.x; feed(b.handle, b.tint, 'bought', S.x, null); } }
+      for (const b of S.players) { if (b.status !== 'in') continue; b.at = S.x; const pm = S.x / b.entry; b.pnl = b.stake * (Math.min(25, pm) - 1); if (pm >= b.target || (b.panic && pm <= b.panic && el - b.delay > 1200)) { b.status = 'out'; feed(b.handle, b.tint, 'sold', S.x, b.pnl); S.lastEvent = S.lastEvent || 'botout'; } }
+      emit(); return;
+    }
+    if (now >= S.phaseEnds) intermission(); emit();
+  }
+  function payout() { if (S.you.status !== 'in') return null; return Math.min(25, S.x / S.you.entry); }
+  const api = {
+    S, TICKERS,
+    subscribe(f) { subs.add(f); return () => subs.delete(f); },
+    setStake(v) { S.stake = v; emit(); },
+    buy() { if (!(S.you.status === 'idle' || S.you.status === 'out')) return false; if (S.stake > S.balance) return false; S.balance -= S.stake; if (S.phase === 'live') { S.you = { status: 'in', entry: S.x, exit: null, stake: S.stake }; feed('you', '#ffd166', 'bought', S.x, null); S.lastEvent = 'youin'; } else { S.you = { status: 'queued', entry: null, exit: null, stake: S.stake }; S.lastEvent = 'queued'; } emit(); return true; },
+    sell() { if (S.phase !== 'live' || S.you.status !== 'in') return false; const p = payout(); const pnl = S.you.stake * (p - 1); S.balance += S.you.stake + pnl; S.you = { ...S.you, status: 'out', exit: S.x, pnl, payout: p }; feed('you', '#ffd166', 'sold', S.x, pnl); S.lastEvent = 'youout'; emit(); return true; },
+    payout, pnl() { const p = payout(); return p === null ? null : S.you.stake * (p - 1); },
+    start() { intermission(); setInterval(tick, TICK); },
+  };
+  return api;
+})();
+</script>
+<script>
+const $ = (s) => document.querySelector(s);
+const S = MC.S; const cv = $('#c'), ctx = cv.getContext('2d');
+let lastPhase = null, lastBal = S.balance, lastFeedId = null, lastResult = null, autoAt = null;
+const fmt = (v) => v.toFixed(2) + 'x';
+const band = x => x < 1.5 ? 'dust' : x < 5 ? 'ok' : x < 15 ? 'big' : 'monster';
+function fx(html, ms) { const el = document.createElement('div'); el.innerHTML = html; $('#fx').appendChild(el); setTimeout(() => el.remove(), ms); }
+function confetti(colors) { const b = $('#board'); for (let i = 0; i < 26; i++) { const c = document.createElement('i'); c.className = 'confetti'; c.style.left = (30 + Math.random() * 40) + '%'; c.style.top = '30%'; c.style.background = colors[i % colors.length]; c.style.setProperty('--dx', (Math.random() * 400 - 200) + 'px'); c.style.animationDelay = (Math.random() * .2) + 's'; c.style.borderRadius = i % 3 ? '50%' : '2px'; b.appendChild(c); setTimeout(() => c.remove(), 1800); } }
+
+document.querySelectorAll('.chips .chip').forEach(b => b.addEventListener('click', () => { MC.setStake(+b.dataset.v); document.querySelectorAll('.chips .chip').forEach(x => x.classList.toggle('on', x === b)); }));
+document.querySelectorAll('#autos .chip').forEach(b => b.addEventListener('click', () => { autoAt = autoAt === +b.dataset.a ? null : +b.dataset.a; document.querySelectorAll('#autos .chip').forEach(x => x.classList.toggle('on', +x.dataset.a === autoAt)); }));
+function sell() { const pnl = MC.pnl(); if (!MC.sell()) return; const f = document.createElement('div'); f.className = 'float'; f.textContent = (pnl >= 0 ? '+' : '') + pnl.toFixed(3) + ' ETH'; if (pnl < 0) f.style.color = 'var(--coral)'; $('#floats').appendChild(f); setTimeout(() => f.remove(), 1400); if (pnl >= 0) { fx('<div class="sticker-win">CASHED ' + fmt(S.you.payout) + '</div>', 2000); confetti(['#a6f24a', '#ffd83d', '#6ee7c8', '#ff5fa8', '#7cc8ff']); } }
+$('#go').addEventListener('click', () => { if (S.you.status === 'in') sell(); else MC.buy(); });
+
+function face(x, y, r, happy, col) { ctx.fillStyle = col; ctx.strokeStyle = '#1a1523'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#1a1523'; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .2, r * .12, 0, 7); ctx.arc(x + r * .35, y - r * .2, r * .12, 0, 7); ctx.fill(); ctx.beginPath(); if (happy) ctx.arc(x, y + r * .1, r * .45, .15 * Math.PI, .85 * Math.PI); else ctx.arc(x, y + r * .6, r * .45, 1.15 * Math.PI, 1.85 * Math.PI); ctx.stroke(); }
+
+function draw() {
+  const dpr = devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight; if (cv.width !== w * dpr) { cv.width = w * dpr; cv.height = h * dpr; } ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  const N = 260, vis = S.hist.slice(-N); const top0 = 200, bot = h - 30, left = 20, right = w - 90;
+  if (vis.length < 2) { ctx.setLineDash([10, 10]); ctx.strokeStyle = '#b9b3c8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, h * .72); ctx.lineTo(w, h * .72); ctx.stroke(); ctx.setLineDash([]); return; }
+  let hi = Math.max(1, ...vis), lo = Math.min(1, ...vis); const pad = (hi - lo) * .18 + .03; hi += pad; lo -= pad;
+  const yOf = v => bot - (v - lo) / (hi - lo) * (bot - top0), xOf = i => left + i / (N - 1) * (right - left);
+  const called = S.phase === 'called', last = vis[vis.length - 1], up = last >= 1;
+  ctx.setLineDash([10, 10]); ctx.strokeStyle = '#b9b3c8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, yOf(1)); ctx.lineTo(w, yOf(1)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.font = '900 12px Nunito'; ctx.fillStyle = '#5d5670'; ctx.fillText('1.00x open', w - 84, yOf(1) - 8);
+  if (S.you.status === 'in') { ctx.setLineDash([4, 8]); ctx.strokeStyle = '#b58cff'; ctx.beginPath(); ctx.moveTo(0, yOf(S.you.entry)); ctx.lineTo(w, yOf(S.you.entry)); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#b58cff'; ctx.fillText('you got in at ' + fmt(S.you.entry), 20, yOf(S.you.entry) - 8); }
+  const col = called ? '#ff6b6b' : up ? '#6ee7c8' : '#ff6b6b';
+  const path = () => { ctx.beginPath(); vis.forEach((v, i) => i ? ctx.lineTo(xOf(i), yOf(v)) : ctx.moveTo(xOf(i), yOf(v))); };
+  // fill
+  path(); const lx = xOf(vis.length - 1); ctx.lineTo(lx, bot); ctx.lineTo(xOf(0), bot); ctx.closePath(); ctx.fillStyle = col + '66'; ctx.fill();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round'; path(); ctx.strokeStyle = '#1a1523'; ctx.lineWidth = 12; ctx.stroke(); path(); ctx.strokeStyle = col; ctx.lineWidth = 6; ctx.stroke();
+  const hy = yOf(last); const prev = vis[Math.max(0, vis.length - 6)];
+  if (called) { face(lx, hy, 18, false, '#ff6b6b'); ctx.font = '400 22px "Lilita One"'; ctx.fillStyle = '#1a1523'; ctx.fillText('x_x', lx - 18, hy - 28); }
+  else { const t = performance.now() / 150; face(lx, hy + Math.sin(t) * 2, 18, last >= prev, up ? '#ffd83d' : '#ff9cc7'); }
+  ctx.fillStyle = '#1a1523'; ctx.beginPath(); ctx.roundRect(lx + 26, hy - 16, 62, 30, 10); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = '400 16px "Lilita One"'; ctx.fillText(fmt(last), lx + 33, hy + 5);
+}
+
+function render(S) {
+  const you = S.you, p = MC.payout(), pnl = MC.pnl();
+  if (autoAt && you.status === 'in' && p >= autoAt) sell();
+  $('#tmark').textContent = S.ticker.m; $('#tmark').style.background = S.ticker.c; $('#sym').innerHTML = S.ticker.s + ' <span style="font-size:14px;color:var(--ink2)">' + S.ticker.lev + 'x long</span>'; $('#sub').textContent = S.ticker.n + ' · round #' + S.round;
+  $('#clock').textContent = S.phase === 'live' ? Math.floor(S.elapsed / 60) + ':' + String(Math.floor(S.elapsed % 60)).padStart(2, '0') : S.phase === 'called' ? 'over' : 'reset';
+  const pt = $('#ptag'); pt.textContent = S.phase === 'called' ? 'REKT' : S.phase === 'live' ? 'LIVE' : 'NEXT'; pt.className = 'tag ' + (S.phase === 'called' ? 'over' : S.phase === 'live' ? 'live' : '');
+  $('#watch').textContent = S.watching + ' here';
+  const m = $('#mult'); m.innerHTML = S.x.toFixed(2) + '<span class="x">x</span>'; m.className = 'mult ' + (S.phase === 'called' || S.x < 1 ? 'down' : S.x >= 8 ? 'c4' : S.x >= 3 ? 'c3' : S.x >= 1.5 ? 'c2' : '');
+  $('#status').innerHTML = S.phase === 'called' ? 'Rugged at <b>' + fmt(S.x) + '</b>. Everyone holding got bonked.' : you.status === 'in' ? (p >= 1 ? 'You are up <b>' + fmt(p) + '</b> on your entry!' : 'Down <b>' + fmt(p) + '</b>. Hold your nerve?') : you.status === 'out' ? 'Banked <b>' + fmt(you.payout) + '</b>. Round still running, hop back in?' : 'Tap BUY to hop on. Your entry becomes 1.00x';
+  const inter = S.phase === 'intermission'; $('#ready').hidden = !inter; $('#multwrap').style.visibility = inter ? 'hidden' : 'visible';
+  const cnt = $('#cnt'); if (cnt.textContent != S.opensIn) { cnt.textContent = S.opensIn; cnt.classList.remove('tick'); void cnt.offsetWidth; cnt.classList.add('tick'); }
+  const lp = $('#livepill'); lp.textContent = inter ? 'next' : fmt(S.x); lp.classList.toggle('called', S.phase === 'called');
+  if (S.results[0] && S.results[0] !== lastResult) { lastResult = S.results[0]; $('#pills').innerHTML = S.results.map((r, i) => `<span class="pill ${band(r.x)} ${i === 0 ? 'new' : ''}">${fmt(r.x)}</span>`).join(''); }
+  const bal = $('#bal'); if (S.balance !== lastBal) { bal.className = 'v ' + (S.balance > lastBal ? 'flash-up' : 'flash-down'); lastBal = S.balance; setTimeout(() => bal.className = 'v', 700); } bal.textContent = S.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const go = $('#go');
+  if (you.status === 'in') { go.className = 'go sell'; go.disabled = S.phase !== 'live'; go.innerHTML = 'SELL ' + fmt(p) + '<small>' + (pnl >= 0 ? '+' : '') + pnl.toFixed(3) + ' ETH · cash out now</small>'; }
+  else { go.className = 'go'; go.disabled = S.phase === 'called' || you.status === 'queued' || S.stake > S.balance; go.innerHTML = (you.status === 'queued' ? 'QUEUED' : inter ? 'QUEUE BUY' : 'BUY') + '<small>' + S.stake + ' ETH · ' + (inter || you.status === 'queued' ? 'fills at the 1.00x open' : 'your entry becomes 1.00x') + '</small>'; }
+  const pb = $('#posbox');
+  if (you.status === 'in' || you.status === 'out' || you.status === 'called') {
+    const dead = you.status === 'called', won = you.status === 'out'; const shownP = dead ? 0 : won ? you.payout : p, shownPnl = dead || won ? you.pnl : pnl;
+    const html = `<div class="pos stk ${dead ? 'dead' : won ? 'won' : ''}"><span class="stamp">${dead ? 'BONKED' : won ? 'SOLD' : 'HOLDING'}</span><div><div class="big">${S.ticker.s} · ${you.stake} ETH</div><div class="k">entry ${fmt(you.entry || 1)} · payout ${fmt(shownP)} = sell ÷ entry</div></div><div class="big">${shownPnl >= 0 ? '+' : ''}${shownPnl.toFixed(3)} ETH</div></div>`;
+    if (pb.dataset.k !== you.status) { pb.dataset.k = you.status; pb.innerHTML = html; } else { const el = pb.querySelector('.k'); el.textContent = 'entry ' + fmt(you.entry || 1) + ' · payout ' + fmt(shownP) + ' = sell ÷ entry'; pb.querySelectorAll('.big')[1].textContent = (shownPnl >= 0 ? '+' : '') + shownPnl.toFixed(3) + ' ETH'; }
+  } else { pb.dataset.k = ''; pb.innerHTML = ''; }
+  const rows = [...(you.status === 'in' || you.status === 'out' || you.status === 'called' ? [{ handle: 'you', tint: '#ffd83d', entry: you.entry, pnl: you.status === 'in' ? pnl : you.pnl, status: you.status, you: true }] : []), ...S.players.filter(b => b.status !== 'waiting')];
+  $('#players').innerHTML = rows.length ? rows.map(r => `<div class="row ${r.you ? 'you' : ''}"><span class="av" style="background:${r.tint}">${r.handle[0].toUpperCase()}</span><span><span class="h">${r.handle}</span><span class="s ${r.status}">${r.status === 'in' ? 'in' : r.status === 'out' ? 'out' : 'rekt'}</span><br><span class="sub">entry ${fmt(r.entry || 1)}</span></span><span class="pnl ${r.pnl < 0 ? 'r' : 'g'}">${r.pnl >= 0 ? '+' : ''}${r.pnl.toFixed(2)}</span></div>`).join('') : '<div class="empty">Everyone is waiting for the next round</div>';
+  if (S.feed[0] && S.feed[0].id !== lastFeedId) { lastFeedId = S.feed[0].id; $('#feed').innerHTML = S.feed.map(f => `<div class="row"><span><span style="color:${f.tint}">●</span> <b>${f.handle}</b> <span class="bub ${f.action === 'sold' ? 'v' : f.action === 'called' ? 'c' : 'b'}">${f.action === 'called' ? 'got bonked' : f.action} ${fmt(f.at)}</span></span><span class="pnl ${f.pnl === null ? '' : f.pnl < 0 ? 'r' : 'g'}" style="font-family:var(--disp)">${f.pnl === null ? '' : (f.pnl >= 0 ? '+' : '') + f.pnl.toFixed(2)}</span></div>`).join(''); }
+  if (S.phase !== lastPhase) { lastPhase = S.phase; const b = $('#board'); b.classList.remove('jolt'); if (S.phase === 'called') { void b.offsetWidth; b.classList.add('jolt'); fx('<div class="bonk"><div class="burst"><div class="word">BONK!<small>margin called at ' + fmt(S.x) + '</small></div></div></div>', 2800); confetti(['#ff6b6b', '#ff5fa8', '#1a1523']); } }
+  draw();
+}
+MC.subscribe(render); MC.start();
+</script>
+</body>
+</html>

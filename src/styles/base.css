@@ -1,345 +1,179 @@
 @import './tokens.css';
 
 /* ------------------------------------------------------------------ *
- * MARGIN CALL — base layer.
- * Resets, the felt material, and every keyframe in the product.
- *
- * LAYERS MATTER HERE, and getting them wrong is silent.
- *
- * Tailwind v4 declares `@layer theme, base, components, utilities`, and
- * an UNLAYERED rule beats every one of them regardless of specificity.
- * The first version of this file wrote its element resets unlayered, so
- * `button { background: none }` quietly beat `.bg-gold` on every single
- * button in the product: the console keys, the chips, the tab buttons —
- * all of them rendered with no fill, nothing errored, and the markup
- * read perfectly. Everything below is in an explicit layer for that
- * reason. Component classes go in `components` so utilities can still
- * override them (an `.eyebrow` with a `text-[9px]` next to it must lose).
+ * MARGIN CALL, base layer. Resets, material classes, every keyframe.
+ * Everything is in an explicit Tailwind layer except the
+ * reduced-motion block, which is unlayered because it has to win.
  * ------------------------------------------------------------------ */
 
 @layer base {
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-
-  html {
-    -webkit-text-size-adjust: 100%;
-  }
-
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; color-scheme: dark; }
   body {
     margin: 0;
-    background: var(--color-void);
+    background: var(--color-bg);
+    background-image: radial-gradient(ellipse at 50% 120%, #1a1f4d 0%, transparent 60%);
+    background-attachment: fixed;
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-size: var(--text-base);
-    font-synthesis-weight: none;
+    font-size: 0.9375rem;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    /* The default grey flash on tap reads as a rendering fault on a page
-     * made of moulded plastic keys. Every control draws its own. */
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
   }
-
-  h1, h2, h3, h4, p, figure, blockquote {
-    margin: 0;
-  }
-
-  button, input, select, textarea {
-    font: inherit;
-    color: inherit;
-  }
-
-  button {
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-  }
-
-  svg {
-    display: block;
-  }
-
-  /* Focus is gold on every surface in the product (>= 8.2:1 everywhere).
-   * Never removed, only styled. */
-  :focus-visible {
-    outline: 3px solid var(--color-gold);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-  :focus:not(:focus-visible) {
-    outline: none;
-  }
-
-  ::selection {
-    background: var(--color-gold);
-    color: var(--color-void);
-  }
+  h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { border: 0; padding: 0; background: none; cursor: pointer; }
+  svg { display: block; }
+  :focus-visible { outline: 2px solid var(--color-cyan); outline-offset: 2px; border-radius: 6px; }
+  :focus:not(:focus-visible) { outline: none; }
+  ::selection { background: var(--color-cyan); color: var(--color-bg); }
 }
 
 @layer components {
-  /* ---------------------------------------------------------------- *
-   * The felt.
-   *
-   * A real baize surface has a fine nap and a lit centre. Both are drawn
-   * here rather than shipped as an image: a raster would be one more
-   * request that can 404, and it could not follow the palette.
-   * ---------------------------------------------------------------- */
+  .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; font-weight: 500; }
+  .display { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; }
+  .label {
+    font-size: 0.6875rem; line-height: 1.3; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-3);
+  }
+  .press {
+    transition: transform 120ms var(--ease-out), background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 200ms ease, opacity 160ms ease;
+  }
+  .press:active:not(:disabled) { transform: scale(0.96); }
+  .press:disabled { cursor: not-allowed; }
 
-  .felt-nap {
+  .rail { overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail > * { scroll-snap-align: start; }
+  .scroll-y { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--color-line-2) transparent; }
+
+  /* the HUD corner brackets on the sky */
+  .corner { position: absolute; width: 22px; height: 22px; border: 2px solid rgb(79 240 255 / 0.5); z-index: 3; pointer-events: none; }
+  .corner-tl { top: 14px; left: 14px; border-right: 0; border-bottom: 0; }
+  .corner-tr { top: 14px; right: 14px; border-left: 0; border-bottom: 0; }
+  .corner-bl { bottom: 14px; left: 14px; border-right: 0; border-top: 0; }
+  .corner-br { bottom: 14px; right: 14px; border-left: 0; border-top: 0; }
+
+  /* The big keys. A lit top edge, a solid underside the key sinks into
+   * on press, and a glow in the key's own colour. */
+  .key {
+    --key-under: #0f7a40;
+    --key-glow: rgb(92 255 157 / 0.45);
     position: relative;
-    isolation: isolate;
+    box-shadow:
+      inset 0 2px 0 rgb(255 255 255 / 0.55),
+      inset 0 -3px 0 rgb(0 0 0 / 0.12),
+      0 7px 0 0 var(--key-under),
+      0 18px 40px -10px var(--key-glow);
+    transition: transform 110ms var(--ease-out), box-shadow 110ms var(--ease-out), filter 160ms ease;
   }
-  .felt-nap::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    opacity: 0.17;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-    z-index: 0;
+  .key:active:not(:disabled) {
+    transform: translateY(6px);
+    box-shadow:
+      inset 0 2px 0 rgb(255 255 255 / 0.55),
+      inset 0 -3px 0 rgb(0 0 0 / 0.12),
+      0 1px 0 0 var(--key-under),
+      0 6px 20px -10px var(--key-glow);
   }
-
-  /* The light hanging over the table. Sits under content, over the nap. */
-  .felt-lamp::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: 0;
-    background: radial-gradient(
-      72% 58% at 50% 32%,
-      rgb(255 255 255 / 0.06) 0%,
-      rgb(255 255 255 / 0.022) 42%,
-      rgb(0 0 0 / 0.3) 100%
-    );
+  .key-go { --key-under: #0f7a40; --key-glow: rgb(92 255 157 / 0.5); background: linear-gradient(180deg, #a8ffcb 0%, #5cff9d 45%, #2fd67a 100%); color: var(--color-bg); }
+  .key-abort { --key-under: #7a1230; --key-glow: rgb(255 77 109 / 0.55); background: linear-gradient(180deg, #ffa2b4 0%, #ff4d6d 45%, #d8294b 100%); color: #fff; }
+  .key-gold { --key-under: #7a5a10; --key-glow: rgb(255 207 90 / 0.5); background: linear-gradient(180deg, #ffe8a6 0%, #ffcf5a 45%, #e0ad2e 100%); color: var(--color-bg); }
+  .key:disabled {
+    --key-under: #0b0f22; --key-glow: transparent;
+    background: linear-gradient(180deg, #1b2250, #141a3d); color: var(--color-ink-3);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 5px 0 0 var(--key-under);
   }
 
-  /* ---------------------------------------------------------------- *
-   * Numerals.
-   * Every figure in this product is a multiple, a price or a balance,
-   * and all three are compared down a column. Proportional digits make
-   * live values twitch and columns fail to line up.
-   * ---------------------------------------------------------------- */
-
-  .nums {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: 'tnum' 1;
-  }
-
-  /* The slot-reel numerals: Archivo's width axis pushed wide, so the one
-   * number the whole game is about reads like a machine printed it. */
-  .reel-face {
-    font-variant-numeric: tabular-nums;
-    font-variation-settings: 'wdth' 118;
-    font-weight: 900;
-    letter-spacing: -0.035em;
-  }
-
-  .eyebrow {
-    font-size: var(--text-tag);
-    line-height: 1.25;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  /* ---------------------------------------------------------------- *
-   * Hard-edged material.
-   *
-   * A moulded key sits proud of its own darker underside and bottoms
-   * out when pressed: the press translates down by exactly the shadow
-   * offset, so the key lands on the surface rather than sliding across
-   * it. Both values are read from custom properties set by the variant,
-   * which is also why the shadow is NOT an inline style — an inline
-   * box-shadow cannot be cleared by the :active rule.
-   * ---------------------------------------------------------------- */
-
-  .key-3d {
-    box-shadow: 0 var(--key-depth, 4px) 0 0 var(--key-under, transparent);
-    transition:
-      transform var(--duration-press) var(--ease-key),
-      box-shadow var(--duration-press) var(--ease-key),
-      filter var(--duration-micro) var(--ease-key);
-  }
-  .key-3d:active:not(:disabled) {
-    transform: translateY(var(--key-depth, 4px));
-    box-shadow: none;
-  }
-  .key-3d:disabled {
-    box-shadow: none;
-    cursor: not-allowed;
-  }
-
-  /* Horizontal rails: flick-scrollable, snapped, scrollbar hidden,
-   * because on a table a rail is an edge rather than a widget. */
-  .rail {
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x proximity;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
-  }
-  .rail::-webkit-scrollbar {
-    display: none;
-  }
-  .rail > * {
-    scroll-snap-align: start;
-  }
-
-  .scroll-y {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-rim) transparent;
+  /* Rows that arrive while you watch. */
+  .row-in {
+    opacity: 1; transform: none;
+    transition: opacity 240ms var(--ease-out), transform 240ms var(--ease-out);
+    @starting-style { opacity: 0; transform: translateX(-16px); }
   }
 }
 
-/* Hover lives outside the components layer so a variant's own
- * brightness cannot be clobbered by utility ordering. */
-@media (hover: hover) {
-  .key-3d:hover:not(:disabled) {
-    filter: brightness(1.09);
-  }
+@media (hover: hover) and (pointer: fine) {
+  .press:hover:not(:disabled) { filter: brightness(1.08); }
 }
 
 /* ------------------------------------------------------------------ *
- * Keyframes.
- * Transform and opacity only — animating layout is jank you will not
- * see on a desktop and every phone user will.
+ * Keyframes. Transform, opacity, filter and colour only.
  * ------------------------------------------------------------------ */
 
-@keyframes mc-rise {
-  from { opacity: 0; transform: translate3d(0, 14px, 0); }
-  to   { opacity: 1; transform: none; }
-}
+@keyframes mc-page  { from { opacity: 0; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: none; } }
+@keyframes mc-dock  { from { opacity: 0; transform: translate3d(-40px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes mc-pop   { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: none; } }
+@keyframes mc-swap  { from { opacity: 0; filter: blur(4px); transform: translateY(3px); } to { opacity: 1; filter: blur(0); transform: none; } }
+@keyframes mc-fade  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mc-sheet { from { transform: translateY(100%); } to { transform: none; } }
 
-@keyframes mc-deal {
-  from { opacity: 0; transform: translate3d(0, 34px, 0) rotate(-7deg) scale(0.94); }
-  to   { opacity: 1; transform: none; }
-}
-
-@keyframes mc-slot-in {
-  from { opacity: 0; transform: translate3d(-14px, 0, 0) scale(0.88); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* The ticket sliding out of the console slot. */
-@keyframes mc-print {
-  0%   { opacity: 0; transform: translate3d(0, -50px, 0) rotate(-3deg); clip-path: inset(0 0 100% 0); }
-  55%  { opacity: 1; }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) rotate(-1.2deg); clip-path: inset(0 0 0 0); }
-}
-
-/* The stamp landing on the ticket. Overshoots, then settles. */
-@keyframes mc-stamp {
-  0%   { opacity: 0; transform: rotate(-11deg) scale(2.6); }
-  55%  { opacity: 1; transform: rotate(-11deg) scale(0.92); }
-  76%  { transform: rotate(-11deg) scale(1.06); }
-  100% { opacity: 1; transform: rotate(-11deg) scale(1); }
-}
-
-/* Each shred strip falls on its own delay — see Ticket.tsx. */
-@keyframes mc-shred {
-  0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
-  100% { transform: translate3d(var(--shred-x, 0px), 150%, 0) rotate(var(--shred-r, 8deg)); opacity: 0; }
-}
-
-/* The margin call. The whole table takes the hit. */
-@keyframes mc-shake {
+/* the margin call */
+@keyframes mc-jolt {
   0%, 100% { transform: translate3d(0, 0, 0); }
-  12%  { transform: translate3d(-9px, 3px, 0); }
-  26%  { transform: translate3d(8px, -3px, 0); }
-  40%  { transform: translate3d(-6px, -2px, 0); }
-  56%  { transform: translate3d(5px, 2px, 0); }
-  72%  { transform: translate3d(-3px, 1px, 0); }
-  86%  { transform: translate3d(2px, 0, 0); }
+  15% { transform: translate3d(-10px, 4px, 0); }
+  35% { transform: translate3d(9px, -4px, 0); }
+  55% { transform: translate3d(-5px, 2px, 0); }
+  75% { transform: translate3d(3px, -1px, 0); }
 }
+@keyframes mc-boom {
+  0%   { opacity: 1; transform: scale(0.2); }
+  40%  { opacity: 0.9; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+@keyframes mc-burn { 0% { background-color: var(--color-down); } }
+@keyframes mc-burnout { to { opacity: 0; transform: translateY(20px); filter: blur(6px); } }
 
-@keyframes mc-flood {
-  0%   { opacity: 0; }
-  14%  { opacity: 0.9; }
-  100% { opacity: 0.38; }
+/* the eject */
+@keyframes mc-eject {
+  0%   { transform: none; }
+  35%  { transform: translate(44px, -18px) rotate(8deg); }
+  100% { transform: none; opacity: 0.7; }
 }
+@keyframes mc-ejectfx {
+  0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.6); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  80%  { opacity: 1; transform: translate(-50%, -70%); }
+  100% { opacity: 0; transform: translate(-50%, -90%); }
+}
+@keyframes mc-sway { 50% { transform: rotate(12deg); } }
 
-/* The number landing when a round settles. */
-@keyframes mc-slam {
-  0%   { opacity: 0; transform: scale(1.45); }
-  62%  { opacity: 1; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* Used as a second, delayed animation on the liquidation stamp so it
- * leaves with the shredded paper instead of hanging in mid-air. */
-@keyframes mc-fade {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-
-@keyframes mc-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.45; transform: scale(0.8); }
-}
-
-@keyframes mc-marquee {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-50%, 0, 0); }
-}
-
-/* The gold rope light chasing round the table rim while a round is live. */
-@keyframes mc-chase {
-  from { background-position: 0 0; }
-  to   { background-position: 56px 0; }
-}
+@keyframes mc-alarm { 50% { filter: brightness(1.15) saturate(1.2); } }
+@keyframes mc-blink { 50% { opacity: 0.2; } }
+@keyframes mc-flash-up   { 0% { color: var(--color-up);   text-shadow: 0 0 16px var(--color-up); } }
+@keyframes mc-flash-down { 0% { color: var(--color-down); text-shadow: 0 0 16px var(--color-down); } }
+@keyframes mc-marquee { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
 
 @layer components {
-  .anim-rise  { animation: mc-rise var(--duration-surface) var(--ease-out) both; }
-  .anim-deal  { animation: mc-deal var(--duration-deal) var(--ease-out) both; }
-  .anim-slot  { animation: mc-slot-in var(--duration-micro) var(--ease-out) both; }
-  .anim-print { animation: mc-print 540ms var(--ease-out) both; }
-  .anim-stamp { animation: mc-stamp 460ms var(--ease-slam) both; }
-  .anim-shake { animation: mc-shake 620ms var(--ease-key) both; }
-  .anim-flood { animation: mc-flood 900ms var(--ease-out) both; }
-  .anim-slam  { animation: mc-slam 420ms var(--ease-slam) both; }
-  .anim-pulse { animation: mc-pulse 1.6s ease-in-out infinite; }
-
-  .marquee-track {
-    animation: mc-marquee 46s linear infinite;
-  }
-
-  .rim-chase {
-    background-image: repeating-linear-gradient(
-      90deg,
-      var(--color-gold) 0 10px,
-      transparent 10px 28px
-    );
-    background-size: 56px 100%;
-    animation: mc-chase 900ms linear infinite;
-  }
+  .anim-page   { animation: mc-page 240ms var(--ease-out) both; }
+  .anim-dock   { animation: mc-dock 400ms var(--ease-snap) both; }
+  .anim-pop    { animation: mc-pop 350ms var(--ease-snap) both; }
+  .anim-swap   { animation: mc-swap 200ms var(--ease-out) both; }
+  .anim-fade   { animation: mc-fade 200ms ease both; }
+  .anim-sheet  { animation: mc-sheet 420ms var(--ease-drawer) both; }
+  .anim-jolt   { animation: mc-jolt 500ms var(--ease-out) both; }
+  .anim-boom   { animation: mc-boom 1.2s var(--ease-out) both; }
+  .anim-burn   { animation: mc-burn 600ms ease-out both; }
+  .anim-burnout { animation: mc-dock 300ms both, mc-burnout 600ms ease-in 1300ms both; }
+  .anim-eject  { animation: mc-eject 1.2s ease-out both; }
+  .anim-ejectfx { animation: mc-ejectfx 1.6s ease-out both; }
+  .anim-sway   { animation: mc-sway 1s ease-in-out infinite; }
+  .anim-alarm  { animation: mc-alarm 800ms ease-in-out infinite; }
+  .anim-blink  { animation: mc-blink 1s ease-in-out infinite; }
+  .flash-up    { animation: mc-flash-up 800ms ease-out both; }
+  .flash-down  { animation: mc-flash-down 800ms ease-out both; }
+  .marquee-track { animation: mc-marquee 48s linear infinite; }
 }
-
-/* ------------------------------------------------------------------ *
- * Reduced motion. Unlayered on purpose: this one has to win.
- *
- * Substitute the settled end state rather than merely slowing things
- * down. Every animation above uses `both` fill, so collapsing the
- * duration leaves the element at its 100% frame, not stuck at 0%.
- * ------------------------------------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
     scroll-behavior: auto !important;
   }
-  .anim-pulse { opacity: 1 !important; }
-  .rim-chase { animation: none !important; }
+  .anim-blink, .anim-sway { opacity: 1 !important; }
   .marquee-track { animation: none !important; }
+  .anim-fade, .anim-page { animation-duration: 120ms !important; }
 }

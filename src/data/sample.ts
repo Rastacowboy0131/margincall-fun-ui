@@ -328,7 +328,7 @@ export const CHAIN = {
 /* Product configuration for the console. Denominations and leverage
  * steps are the house's, not the player's — they belong here beside the
  * house edge, not hard-coded into the control that renders them. */
-export const STAKE_CHIPS_ETH = [0.1, 0.5, 1, 5] as const
+export const STAKE_CHIPS_ETH = [0.001, 0.005, 0.01, 0.1] as const
 
 /* Auto-sell targets, as multiples of your entry.
  *

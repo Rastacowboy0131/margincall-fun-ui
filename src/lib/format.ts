@@ -87,3 +87,11 @@ export const BAND_LABEL: Record<ResultBand, string> = {
 export function clampHandle(handle: string, max = 16): string {
   return handle.length <= max ? handle : `${handle.slice(0, max - 1)}…`
 }
+
+/** A stake. Two decimals when that is exact, otherwise up to six,
+ *  trimmed: `0.50`, `0.001`, `0.0025`. */
+export function stake(value: number): string {
+  const long = value.toFixed(6).replace(/0+$/, '').replace(/\.$/, '')
+  const dec = long.includes('.') ? long.split('.')[1].length : 0
+  return dec <= 2 ? value.toFixed(2) : long
+}

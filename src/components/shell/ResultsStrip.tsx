@@ -1,95 +1,41 @@
 import type { Result } from '../../data/types'
 import { BAND_LABEL, bandOf, x, type ResultBand } from '../../lib/format'
+import { useFlip } from '../../lib/useFlip'
 import { cx } from '../../lib/cx'
 
-/* ------------------------------------------------------------------ *
- * The results strip.
- *
- * If you only keep one thing from this design, keep this. In a crash
- * game the row of past multiples is the most-read element on the page —
- * players treat it exactly like the board above a roulette wheel and
- * check it before every single round. The previous build had this data
- * buried three clicks away inside a history table, which is the single
- * biggest reason the old interface felt like a spreadsheet.
- *
- * The band colour is enrichment, never the carrier: the multiple itself
- * is printed on every pill, so nothing here is communicated by colour
- * alone. The band is also named in the accessible label.
- * ------------------------------------------------------------------ */
+/* The flight log: where the last flights were lost. The most-read
+ * element on the page. A new result lands at the front and the rest
+ * slide one slot right. */
 
 const BAND: Record<ResultBand, string> = {
-  dust: 'border-rim bg-panel text-ink-2',
-  ok: 'border-up-deep/40 bg-up-wash text-up',
-  big: 'border-gold-deep/45 bg-gold-wash text-gold',
-  monster: 'border-live-deep/55 bg-live-wash text-live',
+  dust: 'border-line text-ink-3',
+  ok: 'border-up/40 text-up',
+  big: 'border-gold text-gold shadow-[0_0_14px_rgb(255_207_90/0.3)]',
+  monster: 'border-gold bg-gold font-medium text-bg shadow-[0_0_22px_rgb(255_207_90/0.6)]',
 }
 
-export function ResultsStrip({
-  liveX,
-  phase,
-  results,
-}: {
-  liveX: number
-  phase: string
-  /** Settled rounds, newest first, from the engine. */
-  results: Result[]
-}) {
+export function ResultsStrip({ liveX, phase, opensInSec, results }: { liveX: number; phase: string; opensInSec: number; results: Result[] }) {
+  const ref = useFlip<HTMLUListElement>(results[0]?.roundId ?? -1)
+  const live = phase === 'live'
+  const called = phase === 'called'
   return (
-    <div className="border-b border-rim bg-void/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-[1560px] items-center gap-3 px-3 sm:px-5">
-        <span className="eyebrow hidden shrink-0 text-ink-3 lg:block">Last rounds</span>
-
-        <ul className="rail flex min-w-0 flex-1 items-center gap-1.5 py-2">
-          {/* The round in progress. It has no result yet, which is the
-           * entire tension of the game, so it is drawn as an outline
-           * rather than a filled pill. */}
+    <div className="border-b border-line bg-bg/70 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-[1440px] items-center gap-3 px-4 sm:px-6">
+        <span className="label hidden shrink-0 lg:block">Flight log</span>
+        <ul ref={ref} className="rail flex min-w-0 flex-1 items-center gap-2 py-2.5">
           <li className="shrink-0">
-            {/* Keyed on the phase so the pill re-mounts and slides in
-             * each time the round changes state. The strip is the one
-             * thing on this page a player checks between rounds; it had
-             * no reaction at all when a round settled, which made the
-             * most-read element on the page the deadest one. */}
-            <span
-              key={phase}
-              className={cx(
-                'anim-slot nums flex h-8 items-center gap-1.5 rounded-tag border-2 px-2.5 text-xs font-extrabold',
-                phase === 'called'
-                  ? 'border-down bg-down-wash text-down'
-                  : 'border-gold bg-transparent text-gold',
-              )}
-            >
-              <span
-                className={cx(
-                  'size-1.5 rounded-chip',
-                  phase === 'called' ? 'bg-down' : 'anim-pulse bg-gold',
-                )}
-                aria-hidden="true"
-              />
-              {phase === 'intermission' ? 'next up' : x(liveX)}
+            <span key={phase} className={cx('anim-pop num flex h-7 items-center rounded-pill border px-2.5 text-xs', called ? 'border-down text-down' : live ? (liveX < 1 ? 'border-down/60 text-down' : 'border-cyan text-cyan') : 'border-line-2 text-ink-2')}>
+              {phase === 'intermission' ? `T-${opensInSec}` : x(liveX)}
             </span>
           </li>
-
-          <li aria-hidden="true" className="h-5 w-px shrink-0 bg-rim" />
-
+          <li aria-hidden="true" className="h-4 w-px shrink-0 bg-line-2" />
           {results.map((r) => {
             const band = bandOf(r.ruggedAtX)
             return (
-              <li key={r.roundId} className="shrink-0">
-                {/* `relative` is load-bearing. Tailwind's sr-only is
-                 * position:absolute, so without a positioned parent
-                 * these labels resolve against the sticky wrapper
-                 * outside the rail, land at their static x — 900px into
-                 * the scrolled content — and stretch the document
-                 * sideways. Nothing looks wrong; the page just scrolls
-                 * horizontally on every phone. */}
-                <span
-                  className={cx(
-                    'nums relative flex h-8 items-center rounded-tag border px-2.5 text-xs font-bold',
-                    BAND[band],
-                  )}
-                >
+              <li key={r.roundId} data-flip={r.roundId} className="shrink-0">
+                <span className={cx('num relative flex h-7 items-center rounded-pill border px-2.5 text-xs', BAND[band])}>
                   {x(r.ruggedAtX)}
-                  <span className="sr-only">{` — round ${r.roundId}, ${r.ticker}, ${BAND_LABEL[band]}`}</span>
+                  <span className="sr-only">{`, flight ${r.roundId}, ${r.ticker}, ${BAND_LABEL[band]}`}</span>
                 </span>
               </li>
             )

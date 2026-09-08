@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Margin Call · Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400..700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #06050d; --screen: #0b0a1a; --panel: #110f22; --line: #26224a;
+    --ink: #eef0ff; --ink2: #a5a3c9; --ink3: #5f5c86;
+    --grn: #39ff88; --mag: #ff3ea5; --cyn: #29e6ff; --yel: #ffe14d; --red: #ff3b3b;
+    --px: 'Press Start 2P', monospace; --disp: 'Pixelify Sans', monospace; --sans: 'Space Grotesk', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+  body { min-height: 100dvh; background-image: radial-gradient(circle at 50% -20%, #1b1440 0%, transparent 55%), repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.012) 3px 4px); }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  .px { font-family: var(--px); letter-spacing: 0; }
+  .mono { font-family: var(--disp); font-variant-numeric: tabular-nums; }
+
+  header { display: flex; align-items: center; gap: 24px; height: 60px; padding: 0 20px; border-bottom: 2px solid var(--line); background: #0a0918; }
+  .mark { display: flex; align-items: center; gap: 12px; }
+  .mark .logo { width: 30px; height: 30px; background: var(--mag); box-shadow: 0 0 0 2px #000, 0 0 18px var(--mag); image-rendering: pixelated; clip-path: polygon(40% 0,60% 0,60% 25%,85% 25%,85% 75%,60% 75%,60% 100%,40% 100%,40% 75%,15% 75%,15% 25%,40% 25%); }
+  .mark .name { font-family: var(--px); font-size: 12px; color: var(--yel); text-shadow: 3px 3px 0 #7a1b4a; }
+  .mark .name::after { content: '_'; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  nav { display: flex; gap: 6px; }
+  nav a { font-family: var(--px); font-size: 9px; padding: 10px 12px; color: var(--ink3); text-decoration: none; }
+  nav a.on { color: var(--cyn); text-shadow: 0 0 10px var(--cyn); }
+  nav a.on::before { content: '▶ '; }
+  .coin { margin-left: auto; display: flex; align-items: center; gap: 10px; border: 2px solid var(--line); padding: 6px 12px; background: #000; }
+  .coin .lbl { font-family: var(--px); font-size: 8px; color: var(--yel); }
+  .coin .val { font-family: var(--disp); font-size: 22px; font-weight: 700; color: var(--grn); text-shadow: 0 0 8px rgba(57,255,136,.7); min-width: 120px; text-align: right; }
+  .coin .val.flash-up { animation: fu .8s ease-out; } .coin .val.flash-down { animation: fd .8s ease-out; }
+  @keyframes fu { 0% { color: #fff; text-shadow: 0 0 20px #fff; transform: scale(1.1); } }
+  @keyframes fd { 0% { color: var(--red); text-shadow: 0 0 20px var(--red); transform: scale(1.1); } }
+  .p1 { width: 36px; height: 36px; background: var(--yel); color: #000; display: grid; place-items: center; font-family: var(--px); font-size: 10px; box-shadow: 3px 3px 0 #7a5a00; }
+
+  .ribbon { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-bottom: 2px solid var(--line); overflow: hidden; }
+  .ribbon .lbl { font-family: var(--px); font-size: 8px; color: var(--ink3); flex-shrink: 0; }
+  .pill { font-family: var(--disp); font-weight: 700; font-size: 15px; padding: 3px 9px; border: 2px solid; flex-shrink: 0; }
+  .pill.dust { border-color: var(--line); color: var(--ink3); }
+  .pill.ok { border-color: var(--grn); color: var(--grn); }
+  .pill.big { border-color: var(--yel); color: var(--yel); box-shadow: 0 0 10px rgba(255,225,77,.4); }
+  .pill.monster { border-color: var(--mag); color: #fff; background: var(--mag); box-shadow: 0 0 16px var(--mag); }
+  .pill.live { border-color: var(--cyn); color: var(--cyn); animation: pulseb 1s ease-in-out infinite; }
+  .pill.live.called { border-color: var(--red); color: var(--red); animation: none; }
+  @keyframes pulseb { 50% { box-shadow: 0 0 14px var(--cyn); } }
+  .pill.new { animation: pop .3s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } }
+
+  main { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 16px; padding: 16px 20px; max-width: 1440px; margin: 0 auto; }
+  @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+
+  /* the cabinet */
+  .cabinet { background: linear-gradient(180deg, #1c1836, #0d0b1c); border: 3px solid #2f2a5c; border-radius: 22px; padding: 14px; box-shadow: inset 0 0 0 3px #000, 0 30px 60px -20px #000; position: relative; }
+  .screen { position: relative; border-radius: 14px; overflow: hidden; background: var(--screen); min-height: 470px; box-shadow: inset 0 0 80px rgba(0,0,0,.9); }
+  .screen::before { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 5; background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 2px 4px); mix-blend-mode: multiply; }
+  .screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 6; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.55) 100%); }
+  .screen .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(41,230,255,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(41,230,255,.07) 1px, transparent 1px); background-size: 40px 40px; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .hud { position: absolute; z-index: 4; }
+  .hud.tl { top: 18px; left: 20px; display: flex; align-items: center; gap: 12px; }
+  .tmark { width: 34px; height: 34px; display: grid; place-items: center; font-family: var(--px); font-size: 9px; color: #000; box-shadow: 3px 3px 0 #000; }
+  .hud .sym { font-family: var(--px); font-size: 12px; color: #fff; text-shadow: 2px 2px 0 #000; }
+  .hud .sub { font-family: var(--px); font-size: 7px; color: var(--ink3); margin-top: 6px; }
+  .hud.tr { top: 18px; right: 20px; font-family: var(--px); font-size: 9px; color: var(--cyn); display: flex; gap: 14px; }
+  .hud.tr .t { color: var(--ink3); }
+  .mult-wrap { position: absolute; z-index: 4; left: 0; right: 0; top: 76px; text-align: center; pointer-events: none; }
+  .mult { font-family: var(--disp); font-weight: 700; font-size: clamp(64px, 12vw, 128px); line-height: 1; letter-spacing: .02em; color: var(--grn); text-shadow: 0 0 12px rgba(57,255,136,.9), 0 0 40px rgba(57,255,136,.5), -3px 0 0 rgba(255,62,165,.55), 3px 0 0 rgba(41,230,255,.55); transition: color .3s, text-shadow .3s, transform .1s; }
+  .mult.down { color: var(--red); text-shadow: 0 0 12px rgba(255,59,59,.9), 0 0 40px rgba(255,59,59,.5), -3px 0 0 rgba(255,62,165,.55), 3px 0 0 rgba(41,230,255,.55); }
+  .mult.hot { animation: shake .12s linear infinite; }
+  @keyframes shake { 0%{transform:translate(0,0)} 25%{transform:translate(1px,-1px)} 50%{transform:translate(-1px,1px)} 75%{transform:translate(1px,1px)} }
+  .mult .x { font-size: .45em; }
+  .status { font-family: var(--px); font-size: 9px; color: var(--ink2); margin-top: 10px; line-height: 1.8; }
+  .status b { color: var(--yel); font-weight: 400; }
+  .ready { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; text-align: center; }
+  .ready .big { font-family: var(--px); font-size: 22px; color: var(--yel); text-shadow: 4px 4px 0 #7a5a00; animation: blink 1s steps(1) infinite; }
+  .ready .n { font-family: var(--disp); font-size: 140px; font-weight: 700; color: #fff; line-height: 1; text-shadow: 0 0 30px var(--cyn); }
+  .ready .n.tick { animation: pop .35s cubic-bezier(.34,1.56,.64,1) both; }
+  .callfx { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
+  .callfx .flash { position: absolute; inset: 0; background: var(--red); animation: rf .9s ease-out both; }
+  @keyframes rf { 0% { opacity: .85; } 100% { opacity: .12; } }
+  .callfx .txt { position: absolute; left: 0; right: 0; top: 34%; text-align: center; font-family: var(--px); font-size: clamp(18px, 3.4vw, 34px); color: #fff; text-shadow: 4px 4px 0 var(--red), -4px -4px 0 var(--cyn); animation: glitch .5s steps(2) 4; }
+  @keyframes glitch { 0% { transform: translate(0); clip-path: inset(0 0 60% 0);} 25% { transform: translate(-6px, 2px); clip-path: inset(30% 0 20% 0);} 50% { transform: translate(6px,-2px); clip-path: inset(60% 0 0 0);} 75% { transform: translate(-3px,0); clip-path: inset(10% 0 50% 0);} 100% { transform: none; clip-path: none; } }
+  .callfx .sub { position: absolute; left: 0; right: 0; top: 52%; text-align: center; font-family: var(--px); font-size: 10px; color: var(--yel); }
+  .screen.jolt { animation: jolt .4s ease-out both; }
+  @keyframes jolt { 20% { transform: translate(-8px, 3px); } 45% { transform: translate(7px, -3px); } 70% { transform: translate(-3px, 1px); } }
+  .winner { position: absolute; z-index: 7; left: 0; right: 0; top: 30%; text-align: center; font-family: var(--px); font-size: 22px; color: var(--yel); text-shadow: 4px 4px 0 #7a5a00, 0 0 30px var(--yel); animation: win 1.6s ease-out both; pointer-events: none; }
+  @keyframes win { 0% { transform: scale(.4); opacity: 0; } 15% { transform: scale(1.15); opacity: 1; } 30% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-30px); } }
+
+  /* deck */
+  .deck { margin-top: 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; padding: 14px 18px; background: linear-gradient(180deg, #221c45, #14112b); border-radius: 16px; border: 3px solid #2f2a5c; box-shadow: inset 0 2px 0 rgba(255,255,255,.08); }
+  @media (max-width: 760px) { .deck { grid-template-columns: 1fr; } }
+  .stakes { display: flex; gap: 12px; align-items: center; }
+  .stakes .lbl { font-family: var(--px); font-size: 8px; color: var(--ink3); width: 60px; line-height: 1.6; }
+  .abtn { width: 54px; height: 54px; border-radius: 50%; position: relative; font-family: var(--disp); font-weight: 700; font-size: 18px; color: #000; background: radial-gradient(circle at 35% 30%, #fff8, transparent 40%), var(--c); box-shadow: 0 6px 0 #000, inset 0 -6px 0 rgba(0,0,0,.3); transition: transform .08s, box-shadow .08s; }
+  .abtn:active, .abtn.on { transform: translateY(5px); box-shadow: 0 1px 0 #000, inset 0 -2px 0 rgba(0,0,0,.3), 0 0 0 3px #fff, 0 0 18px var(--c); }
+  .abtn.on::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 2px dashed var(--yel); animation: spin 6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .readout { display: flex; flex-direction: column; gap: 6px; }
+  .led { background: #000; border: 2px solid var(--line); padding: 10px 14px; display: flex; justify-content: space-between; align-items: baseline; gap: 16px; box-shadow: inset 0 0 20px rgba(0,0,0,1); }
+  .led .k { font-family: var(--px); font-size: 8px; color: var(--ink3); }
+  .led .v { font-family: var(--disp); font-weight: 700; font-size: 22px; color: var(--yel); text-shadow: 0 0 10px rgba(255,225,77,.6); }
+  .led .v.g { color: var(--grn); text-shadow: 0 0 10px rgba(57,255,136,.6);} .led .v.r { color: var(--red); text-shadow: 0 0 10px rgba(255,59,59,.6);}
+  .combo { height: 12px; background: #000; border: 2px solid var(--line); position: relative; overflow: hidden; }
+  .combo i { position: absolute; inset: 0; transform-origin: left; background: repeating-linear-gradient(90deg, var(--grn) 0 8px, #000 8px 10px); transition: transform .15s linear; }
+  .combo i.r { background: repeating-linear-gradient(90deg, var(--red) 0 8px, #000 8px 10px); }
+  .go { position: relative; width: 210px; height: 96px; border-radius: 22px; font-family: var(--px); font-size: 13px; color: #fff; text-shadow: 2px 2px 0 #000; background: radial-gradient(circle at 50% 20%, #ff7b7b, var(--red) 60%, #a10000); box-shadow: 0 10px 0 #5a0000, 0 0 30px rgba(255,59,59,.4), inset 0 2px 0 #ffb3b3; transition: transform .08s, box-shadow .08s; letter-spacing: 1px; }
+  .go:active { transform: translateY(8px); box-shadow: 0 2px 0 #5a0000, inset 0 2px 0 #ffb3b3; }
+  .go.sell { background: radial-gradient(circle at 50% 20%, #9dffc7, var(--grn) 60%, #0d8f45); box-shadow: 0 10px 0 #05502a, 0 0 30px rgba(57,255,136,.5), inset 0 2px 0 #d5ffe6; color: #000; text-shadow: none; animation: pulseg .9s ease-in-out infinite; }
+  @keyframes pulseg { 50% { box-shadow: 0 10px 0 #05502a, 0 0 50px rgba(57,255,136,.9), inset 0 2px 0 #d5ffe6; } }
+  .go.sell:active { transform: translateY(8px); box-shadow: 0 2px 0 #05502a; animation: none; }
+  .go:disabled { background: #2a2745; box-shadow: 0 10px 0 #0e0c1c; color: var(--ink3); cursor: not-allowed; animation: none; }
+  .go small { display: block; font-size: 8px; margin-top: 8px; opacity: .85; }
+  .float { position: absolute; left: 50%; top: -10px; transform: translateX(-50%); font-family: var(--px); font-size: 14px; color: var(--grn); text-shadow: 2px 2px 0 #000; animation: floatUp 1.4s ease-out both; pointer-events: none; white-space: nowrap; }
+  @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -10px) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
+
+  /* side */
+  aside { display: flex; flex-direction: column; gap: 16px; }
+  .box { background: var(--panel); border: 3px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .box h2 { margin: 0; font-family: var(--px); font-size: 9px; padding: 12px 14px; border-bottom: 3px solid var(--line); color: var(--cyn); display: flex; justify-content: space-between; }
+  .box h2 span { color: var(--mag); }
+  .rows { max-height: 320px; overflow: auto; scrollbar-width: none; }
+  .row { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; padding: 8px 14px; font-size: 13px; border-bottom: 1px solid #1b1838; animation: rowin .25s ease-out both; }
+  @keyframes rowin { from { opacity: 0; transform: translateX(-8px);} }
+  .row.you { background: #1c1838; }
+  .row .av { width: 22px; height: 22px; display: grid; place-items: center; font-family: var(--px); font-size: 8px; color: #fff; box-shadow: 2px 2px 0 #000; }
+  .row .h { font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .s { font-family: var(--px); font-size: 7px; margin-left: 6px; }
+  .row .s.in { color: var(--yel);} .row .s.out { color: var(--grn);} .row .s.called { color: var(--red);}
+  .row .pnl { font-family: var(--disp); font-weight: 700; font-size: 16px; text-align: right; }
+  .row .pnl.g { color: var(--grn);} .row .pnl.r { color: var(--red);}
+  .row .sub { font-family: var(--disp); font-size: 12px; color: var(--ink3); }
+  .log .row { grid-template-columns: 1fr auto; font-family: var(--disp); font-size: 14px; }
+  .log .v { color: var(--grn);} .log .c { color: var(--red);} .log .b { color: var(--cyn);}
+  .empty { padding: 26px 14px; text-align: center; font-family: var(--px); font-size: 8px; color: var(--ink3); line-height: 2; }
+  .marq { border-top: 2px solid var(--line); margin-top: 8px; overflow: hidden; height: 28px; background: #000; }
+  .marq div { display: inline-block; white-space: nowrap; font-family: var(--px); font-size: 8px; color: var(--yel); line-height: 28px; padding-left: 100%; animation: marq 22s linear infinite; }
+  @keyframes marq { to { transform: translateX(-100%); } }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="mark"><span class="logo"></span><span class="name">MARGIN CALL</span></div>
+  <nav><a class="on" href="#">PLAY</a><a href="#">BOARD</a><a href="#">ME</a><a href="#">REWARDS</a></nav>
+  <div class="coin"><span class="lbl">CREDITS</span><span class="val" id="bal">10000.00</span><span class="lbl" style="color:var(--ink3)">ETH</span></div>
+  <div class="p1">1P</div>
+</header>
+<div class="ribbon"><span class="lbl">LAST RUNS</span><span class="pill live" id="livepill">READY</span><span id="pills" style="display:flex;gap:8px"></span></div>
+
+<main>
+  <section>
+    <div class="cabinet">
+      <div class="screen" id="screen">
+        <div class="grid"></div>
+        <canvas id="c"></canvas>
+        <div class="hud tl"><span class="tmark" id="tmark">NV</span><div><div class="sym" id="sym">NVDAx 20X</div><div class="sub" id="sub">NVIDIA · RUN #4417</div></div></div>
+        <div class="hud tr"><span class="t">TIME</span><span id="clock">0:00</span><span class="t">CROWD</span><span id="crowd">120</span></div>
+        <div class="mult-wrap" id="multwrap"><div class="mult" id="mult">1.00<span class="x">x</span></div><div class="status" id="status">PRESS BUY TO ENTER THE RUN</div></div>
+        <div class="ready" id="ready" hidden><div><div class="big">NEXT RUN IN</div><div class="n" id="cnt">4</div><div class="status">QUEUE A BUY NOW · FILLS AT 1.00x</div></div></div>
+        <div id="fx"></div>
+      </div>
+
+      <div class="deck">
+        <div class="stakes">
+          <span class="lbl">STAKE<br>ETH</span>
+          <button class="abtn" style="--c:#29e6ff" data-v="0.1">.1</button>
+          <button class="abtn on" style="--c:#ff3ea5" data-v="0.5">.5</button>
+          <button class="abtn" style="--c:#ffe14d" data-v="1">1</button>
+          <button class="abtn" style="--c:#39ff88" data-v="5">5</button>
+        </div>
+        <div class="readout">
+          <div class="led"><span class="k" id="ledk">YOUR RUN</span><span class="v" id="ledv">--</span></div>
+          <div class="combo"><i id="combo" style="transform:scaleX(0)"></i></div>
+          <div class="led" style="padding:6px 14px"><span class="k">PAYOUT = SELL ÷ ENTRY</span><span class="v" id="pnl" style="font-size:16px">+0.00</span></div>
+        </div>
+        <div style="position:relative"><button class="go" id="go">BUY<small>0.5 ETH · LONG</small></button><div id="floats"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <aside>
+    <div class="box"><h2>HI-SCORES <span id="watch">◉ 120</span></h2><div class="rows" id="players"></div></div>
+    <div class="box log"><h2>EVENT LOG</h2><div class="rows" id="feed"><div class="empty">QUIET...<br>NOBODY HAS MOVED</div></div></div>
+    <div class="marq"><div>★ HOUSE EDGE 2% · WINNINGS CAPPED AT 25X · PROVABLY FAIR · SELL BEFORE THE CALL · INSERT COIN ★</div></div>
+  </aside>
+</main>
+
+<script>/* Shared mock engine: same maths as the real one (random walk with momentum,
+   exponential rug time), bots, feed, a paper account and you. */
+window.MC = (function () {
+  const TICK = 50, INTER = 4000, CALLED = 2800;
+  const TICKERS = [
+    { s: 'NVDAx', n: 'NVIDIA', m: 'NV', c: '#76b900', lev: 20 },
+    { s: 'TSLAx', n: 'Tesla', m: 'TS', c: '#e31937', lev: 25 },
+    { s: 'GMEx', n: 'GameStop', m: 'GM', c: '#e4002b', lev: 5 },
+    { s: 'HOODx', n: 'Robinhood', m: 'HD', c: '#9dff3f', lev: 20 },
+    { s: 'AMZNx', n: 'Amazon', m: 'AM', c: '#ff9900', lev: 5 },
+    { s: 'AAPLx', n: 'Apple', m: 'AA', c: '#a1a1a6', lev: 5 },
+  ];
+  const NAMES = ['rughunter', 'thetagang', 'cathiewood2', 'shortking', 'papertrader', 'fomo_frank', 'wsb_refugee', 'hoodlum', 'marginqueen', '0xdead', 'larry_liq', 'dianafan', 'gmi_gary', 'sofia', 'baghold_bob'];
+  const TINTS = ['#7c5cff', '#1fb6a6', '#3ba55d', '#3d7bd9', '#8b5cf6', '#14b8a6', '#22c55e', '#c2751b', '#be185d', '#db2777', '#0ea5e9', '#2563eb', '#f59e0b', '#ef4444', '#64748b'];
+  const g = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  function rugSecs() { if (Math.random() < 0.08) return 2 + Math.random() * 2.5; return Math.min(80, 5 + -Math.log(1 - Math.random()) * 14); }
+  function genPath(secs) { const n = Math.ceil(secs * 1000 / TICK); const p = []; let price = 1, mom = 0; for (let i = 0; i < n; i++) { mom = mom * 0.93 + g() * 0.0035; let r = 0.00075 + mom + g() * 0.0028; if (Math.random() < 0.018) r += (Math.random() - 0.42) * 0.055; price = Math.max(0.05, price * (1 + r)); p.push(price); } return p; }
+  const S = {
+    phase: 'intermission', round: 4417, ti: 0, ticker: TICKERS[0], x: 1, path: [], hist: [], idx: 0, phaseEnds: 0, opensIn: 4,
+    results: [], players: [], feed: [], balance: 10000, stake: 0.5, you: { status: 'idle', entry: null, exit: null, stake: 0 }, rugAt: null, elapsed: 0, watching: 120, lastEvent: null,
+  };
+  const subs = new Set();
+  function emit() { subs.forEach(f => f(S)); S.lastEvent = null; }
+  function feed(handle, tint, action, at, pnl) { S.feed.unshift({ id: Math.random(), handle, tint, action, at, pnl, t: Date.now() }); S.feed.length = Math.min(S.feed.length, 14); }
+  function makeBots() { const n = 6 + Math.floor(Math.random() * 6); const idx = [...NAMES.keys()].sort(() => Math.random() - 0.5).slice(0, n); return idx.map(i => ({ handle: NAMES[i], tint: TINTS[i], stake: +rnd(0.05, 1.5).toFixed(2), target: Math.random() < 0.12 ? Infinity : Math.random() < 0.15 ? rnd(4, 12) : 1.05 + Math.random() * Math.random() * 3, panic: Math.random() < 0.4 ? rnd(0.45, 0.8) : 0, delay: Math.random() < 0.35 ? rnd(0, 900) : rnd(1000, 15000), entry: null, at: 1, pnl: 0, status: 'waiting' })); }
+  function intermission() { const now = performance.now(); S.hist = S.path.slice(0, S.idx + 1); S.round += 1; S.ti = (S.ti + 1) % TICKERS.length; S.ticker = TICKERS[S.ti]; S.path = genPath(rugSecs()); S.idx = 0; S.phase = 'intermission'; S.phaseEnds = now + INTER; S.x = 1; S.rugAt = null; S.players = makeBots(); S.watching = 90 + Math.floor(Math.random() * 60); if (S.you.status === 'out' || S.you.status === 'called') S.you = { status: 'idle', entry: null, exit: null, stake: 0 }; S.lastEvent = 'intermission'; }
+  function live() { S.phase = 'live'; S.liveStart = performance.now(); S.x = 1; S.hist = []; if (S.you.status === 'queued') { S.you.status = 'in'; S.you.entry = 1; feed('you', '#ffd166', 'bought', 1, null); } S.lastEvent = 'open'; }
+  function call() { S.phase = 'called'; S.rugAt = S.x; S.results.unshift({ round: S.round, x: S.x, t: S.ticker.s }); S.results.length = Math.min(S.results.length, 12); S.phaseEnds = performance.now() + CALLED; for (const b of S.players) if (b.status === 'in') { b.status = 'called'; b.at = S.x; b.pnl = -b.stake; feed(b.handle, b.tint, 'called', S.x, -b.stake); } if (S.you.status === 'in') { feed('you', '#ffd166', 'called', S.x, -S.you.stake); S.you.status = 'called'; S.you.pnl = -S.you.stake; } if (S.you.status === 'queued') { S.balance += S.you.stake; S.you = { status: 'idle', entry: null, exit: null, stake: 0 }; } S.lastEvent = 'called'; }
+  function tick() {
+    const now = performance.now();
+    if (S.phase === 'intermission') { S.opensIn = Math.max(1, Math.ceil((S.phaseEnds - now) / 1000)); if (now >= S.phaseEnds) live(); emit(); return; }
+    if (S.phase === 'live') {
+      const el = now - S.liveStart; S.elapsed = el / 1000; const i = Math.floor(el / TICK);
+      if (i >= S.path.length) { call(); emit(); return; }
+      S.idx = i; S.x = S.path[i]; S.hist.push(S.x);
+      for (const b of S.players) { if (b.status === 'waiting' && el >= b.delay) { b.status = 'in'; b.entry = S.x; feed(b.handle, b.tint, 'bought', S.x, null); } }
+      for (const b of S.players) { if (b.status !== 'in') continue; b.at = S.x; const pm = S.x / b.entry; b.pnl = b.stake * (Math.min(25, pm) - 1); if (pm >= b.target || (b.panic && pm <= b.panic && el - b.delay > 1200)) { b.status = 'out'; feed(b.handle, b.tint, 'sold', S.x, b.pnl); S.lastEvent = S.lastEvent || 'botout'; } }
+      emit(); return;
+    }
+    if (now >= S.phaseEnds) intermission(); emit();
+  }
+  function payout() { if (S.you.status !== 'in') return null; return Math.min(25, S.x / S.you.entry); }
+  const api = {
+    S, TICKERS,
+    subscribe(f) { subs.add(f); return () => subs.delete(f); },
+    setStake(v) { S.stake = v; emit(); },
+    buy() { if (!(S.you.status === 'idle' || S.you.status === 'out')) return false; if (S.stake > S.balance) return false; S.balance -= S.stake; if (S.phase === 'live') { S.you = { status: 'in', entry: S.x, exit: null, stake: S.stake }; feed('you', '#ffd166', 'bought', S.x, null); S.lastEvent = 'youin'; } else { S.you = { status: 'queued', entry: null, exit: null, stake: S.stake }; S.lastEvent = 'queued'; } emit(); return true; },
+    sell() { if (S.phase !== 'live' || S.you.status !== 'in') return false; const p = payout(); const pnl = S.you.stake * (p - 1); S.balance += S.you.stake + pnl; S.you = { ...S.you, status: 'out', exit: S.x, pnl, payout: p }; feed('you', '#ffd166', 'sold', S.x, pnl); S.lastEvent = 'youout'; emit(); return true; },
+    payout, pnl() { const p = payout(); return p === null ? null : S.you.stake * (p - 1); },
+    start() { intermission(); setInterval(tick, TICK); },
+  };
+  return api;
+})();
+</script>
+<script>
+const $ = (s) => document.querySelector(s);
+const S = MC.S;
+const cv = $('#c'), ctx = cv.getContext('2d');
+let lastPhase = null, lastBal = S.balance, lastFeedId = null, lastResult = null;
+const fmt = (v, d = 2) => v.toFixed(d) + 'x';
+
+function band(x) { return x < 1.5 ? 'dust' : x < 5 ? 'ok' : x < 15 ? 'big' : 'monster'; }
+function fx(html, ms) { const el = document.createElement('div'); el.innerHTML = html; $('#fx').appendChild(el); setTimeout(() => el.remove(), ms); }
+
+document.querySelectorAll('.abtn').forEach(b => b.addEventListener('click', () => { MC.setStake(+b.dataset.v); document.querySelectorAll('.abtn').forEach(x => x.classList.toggle('on', x === b)); }));
+$('#go').addEventListener('click', () => {
+  if (S.you.status === 'in') { const pnl = MC.pnl(); MC.sell(); const f = document.createElement('div'); f.className = 'float'; f.textContent = (pnl >= 0 ? '+' : '') + pnl.toFixed(3) + ' ETH'; if (pnl < 0) f.style.color = 'var(--red)'; $('#floats').appendChild(f); setTimeout(() => f.remove(), 1400); fx('<div class="winner">' + (pnl >= 0 ? 'CASHED OUT!' : 'ESCAPED') + '</div>', 1600); }
+  else MC.buy();
+});
+
+function draw() {
+  const dpr = devicePixelRatio || 1; const w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== w * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  const hist = S.phase === 'intermission' ? S.hist : S.hist; const N = 260; const vis = hist.slice(-N);
+  if (vis.length < 2) { ctx.strokeStyle = 'rgba(255,225,77,.5)'; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.moveTo(0, h * .7); ctx.lineTo(w, h * .7); ctx.stroke(); ctx.setLineDash([]); return; }
+  const top0 = 170, bot = h - 24, left = 16, right = w - 70;
+  let hi = Math.max(1, ...vis), lo = Math.min(1, ...vis); const pad = (hi - lo) * .15 + .02; hi += pad; lo -= pad;
+  const yOf = v => bot - (v - lo) / (hi - lo) * (bot - top0);
+  const xOf = i => left + i / (N - 1) * (right - left);
+  const called = S.phase === 'called';
+  // 1.00 line
+  ctx.strokeStyle = 'rgba(255,225,77,.45)'; ctx.setLineDash([6, 6]); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, yOf(1)); ctx.lineTo(w, yOf(1)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,225,77,.8)'; ctx.font = '8px "Press Start 2P"'; ctx.fillText('1.00x', w - 60, yOf(1) - 6);
+  if (S.you.status === 'in') { ctx.strokeStyle = 'rgba(41,230,255,.7)'; ctx.setLineDash([3, 5]); ctx.beginPath(); ctx.moveTo(0, yOf(S.you.entry)); ctx.lineTo(w, yOf(S.you.entry)); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = 'var(--cyn)'; ctx.fillStyle = '#29e6ff'; ctx.fillText('YOU ' + fmt(S.you.entry), 16, yOf(S.you.entry) - 6); }
+  const up = vis[vis.length - 1] >= 1; const col = called ? '#ff3b3b' : up ? '#39ff88' : '#ff3b3b';
+  // area
+  ctx.beginPath(); vis.forEach((v, i) => i ? ctx.lineTo(xOf(i), yOf(v)) : ctx.moveTo(xOf(i), yOf(v))); const lastX = xOf(vis.length - 1);
+  ctx.lineTo(lastX, bot); ctx.lineTo(xOf(0), bot); ctx.closePath(); const grad = ctx.createLinearGradient(0, top0, 0, bot); grad.addColorStop(0, col + '55'); grad.addColorStop(1, col + '00'); ctx.fillStyle = grad; ctx.fill();
+  // line with glow
+  ctx.shadowColor = col; ctx.shadowBlur = 18; ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.beginPath(); vis.forEach((v, i) => i ? ctx.lineTo(xOf(i), yOf(v)) : ctx.moveTo(xOf(i), yOf(v))); ctx.stroke(); ctx.shadowBlur = 0;
+  // head
+  const hy = yOf(vis[vis.length - 1]); const t = performance.now() / 1000;
+  ctx.fillStyle = '#fff'; ctx.fillRect(lastX - 4, hy - 4, 8, 8); ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.strokeRect(lastX - 8 - Math.sin(t * 8) * 2, hy - 8 - Math.sin(t * 8) * 2, 16 + Math.sin(t * 8) * 4, 16 + Math.sin(t * 8) * 4);
+  ctx.fillStyle = col; ctx.fillRect(lastX + 14, hy - 9, 52, 16); ctx.fillStyle = '#000'; ctx.font = '8px "Press Start 2P"'; ctx.fillText(fmt(vis[vis.length - 1]), lastX + 17, hy + 3);
+  if (called) { ctx.strokeStyle = '#ff3b3b'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(lastX, hy); ctx.lineTo(lastX + 6, bot); ctx.stroke(); }
+}
+
+function render(S) {
+  const you = S.you; const p = MC.payout(); const pnl = MC.pnl();
+  $('#tmark').textContent = S.ticker.m; $('#tmark').style.background = S.ticker.c; $('#sym').textContent = S.ticker.s + ' ' + S.ticker.lev + 'X'; $('#sub').textContent = S.ticker.n.toUpperCase() + ' · RUN #' + S.round;
+  $('#clock').textContent = S.phase === 'live' ? Math.floor(S.elapsed / 60) + ':' + String(Math.floor(S.elapsed % 60)).padStart(2, '0') : S.phase === 'called' ? 'OVER' : '--';
+  $('#crowd').textContent = S.watching; $('#watch').textContent = '◉ ' + S.watching;
+  const mult = $('#mult'); mult.innerHTML = S.x.toFixed(2) + '<span class="x">x</span>'; mult.classList.toggle('down', S.x < 1 || S.phase === 'called'); mult.classList.toggle('hot', S.phase === 'live' && S.x >= 3);
+  $('#status').innerHTML = S.phase === 'called' ? 'RUGGED AT <b>' + fmt(S.x) + '</b> · HOLDERS WIPED' : you.status === 'in' ? (p >= 1 ? 'UP <b>' + fmt(p) + '</b> ON YOUR ENTRY · SELL ANY TIME' : 'DOWN <b>' + fmt(p) + '</b> · HOLD OR BAIL?') : you.status === 'out' ? 'YOU BANKED <b>' + fmt(you.payout) + '</b> · BUY BACK IN?' : 'PRESS BUY · ENTRY BECOMES YOUR 1.00x';
+  const inter = S.phase === 'intermission'; $('#ready').hidden = !inter; $('#multwrap').style.visibility = inter ? 'hidden' : 'visible';
+  const cnt = $('#cnt'); if (cnt.textContent != S.opensIn) { cnt.textContent = S.opensIn; cnt.classList.remove('tick'); void cnt.offsetWidth; cnt.classList.add('tick'); }
+  // ribbon
+  const lp = $('#livepill'); lp.textContent = inter ? 'READY' : fmt(S.x); lp.classList.toggle('called', S.phase === 'called');
+  if (S.results[0] && S.results[0] !== lastResult) { lastResult = S.results[0]; $('#pills').innerHTML = S.results.map((r, i) => `<span class="pill ${band(r.x)} ${i === 0 ? 'new' : ''}">${fmt(r.x)}</span>`).join(''); }
+  // balance
+  const bal = $('#bal'); if (S.balance !== lastBal) { bal.className = 'val ' + (S.balance > lastBal ? 'flash-up' : 'flash-down'); lastBal = S.balance; setTimeout(() => bal.className = 'val', 800); } bal.textContent = S.balance.toFixed(2);
+  // deck
+  const go = $('#go');
+  if (you.status === 'in') { go.className = 'go sell'; go.disabled = S.phase !== 'live'; go.innerHTML = 'SELL!<small>' + fmt(p) + ' · ' + (pnl >= 0 ? '+' : '') + pnl.toFixed(3) + ' ETH</small>'; }
+  else { go.className = 'go'; go.disabled = S.phase === 'called' || you.status === 'queued' || S.stake > S.balance; go.innerHTML = (you.status === 'queued' ? 'QUEUED' : inter ? 'QUEUE BUY' : 'BUY') + '<small>' + S.stake + ' ETH · LONG</small>'; }
+  $('#ledk').textContent = you.status === 'in' ? 'ENTRY ' + fmt(you.entry) : you.status === 'out' ? 'BANKED' : you.status === 'called' ? 'REKT' : you.status === 'queued' ? 'QUEUED' : 'YOUR RUN';
+  const lv = $('#ledv'); lv.textContent = you.status === 'in' ? fmt(p) : you.status === 'out' ? fmt(you.payout) : you.status === 'called' ? '0.00x' : '--'; lv.className = 'v ' + (you.status === 'called' || (p !== null && p < 1) ? 'r' : you.status === 'in' || you.status === 'out' ? 'g' : '');
+  const cb = $('#combo'); const frac = you.status === 'in' ? Math.min(1, (p - 1) / 4 + .1) : you.status === 'out' ? Math.min(1, (you.payout - 1) / 4 + .1) : 0; cb.style.transform = 'scaleX(' + Math.max(0, frac) + ')'; cb.className = p !== null && p < 1 ? 'r' : '';
+  const pv = $('#pnl'); const shown = you.status === 'in' ? pnl : you.status === 'out' || you.status === 'called' ? you.pnl : 0; pv.textContent = (shown >= 0 ? '+' : '') + shown.toFixed(3) + ' ETH'; pv.className = 'v ' + (shown < 0 ? 'r' : 'g');
+  // players
+  const rows = [...(you.status !== 'idle' && you.status !== 'queued' ? [{ handle: 'YOU', tint: '#ffe14d', entry: you.entry, pnl: you.status === 'in' ? pnl : you.pnl, status: you.status === 'in' ? 'in' : you.status, you: true }] : []), ...S.players.filter(b => b.status !== 'waiting').map(b => ({ ...b, status: b.status }))];
+  $('#players').innerHTML = rows.length ? rows.map(r => `<div class="row ${r.you ? 'you' : ''}"><span class="av" style="background:${r.tint}">${r.handle[0].toUpperCase()}</span><span><span class="h">${r.handle}</span><span class="s ${r.status}">${r.status === 'in' ? 'IN' : r.status === 'out' ? 'OUT' : 'REKT'}</span><br><span class="sub">entry ${fmt(r.entry || 1)}</span></span><span class="pnl ${r.pnl < 0 ? 'r' : 'g'}">${r.pnl >= 0 ? '+' : ''}${r.pnl.toFixed(2)}</span></div>`).join('') : '<div class="empty">TABLE RESETTING<br>SEATS OPEN AT LAUNCH</div>';
+  // feed
+  if (S.feed[0] && S.feed[0].id !== lastFeedId) { lastFeedId = S.feed[0].id; $('#feed').innerHTML = S.feed.map(f => `<div class="row"><span><span style="color:${f.tint}">■</span> ${f.handle} <span class="${f.action === 'sold' ? 'v' : f.action === 'called' ? 'c' : 'b'}">${f.action.toUpperCase()}</span> ${fmt(f.at)}</span><span class="${f.pnl === null ? '' : f.pnl < 0 ? 'c' : 'v'}">${f.pnl === null ? '' : (f.pnl >= 0 ? '+' : '') + f.pnl.toFixed(2)}</span></div>`).join(''); }
+  // phase fx
+  if (S.phase !== lastPhase) { lastPhase = S.phase; const sc = $('#screen'); sc.classList.remove('jolt'); if (S.phase === 'called') { void sc.offsetWidth; sc.classList.add('jolt'); fx('<div class="callfx"><div class="flash"></div><div class="txt">MARGIN CALLED</div><div class="sub">RUGGED AT ' + fmt(S.x) + '</div></div>', 2600); } }
+  draw();
+}
+MC.subscribe(render); MC.start();
+</script>
+</body>
+</html>

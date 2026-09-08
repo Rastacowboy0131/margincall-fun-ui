@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Margin Call · Key options</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:ital,wght@0,700;0,800;1,800&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#05070f;--panel:#0e132a;--panel2:#141a3d;--line:#1e2748;--line2:#2b3660;--ink:#f1f4ff;--ink2:#9aa6d0;--ink3:#56628f;--up:#5cff9d;--upd:#1fbf67;--down:#ff4d6d;--downd:#c22a47;--cyan:#4ff0ff;--gold:#ffcf5a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Barlow,system-ui,sans-serif;padding:32px 24px 60px;background-image:radial-gradient(ellipse at 50% 120%,#1a1f4d,transparent 60%)}
+h1{font-family:'Barlow Condensed';font-weight:800;text-transform:uppercase;font-size:40px;margin:0 0 6px}
+p.lead{color:var(--ink2);margin:0 0 28px;max-width:60ch}
+.grid{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));max-width:1200px}
+.card{border:1px solid var(--line2);border-radius:22px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:20px}
+.card h2{font-family:'Barlow Condensed';font-weight:800;text-transform:uppercase;font-size:22px;margin:0;display:flex;gap:10px;align-items:center}
+.card h2 span{font-family:Barlow;font-weight:600;font-size:12px;letter-spacing:.12em;color:var(--cyan);border:1px solid var(--cyan);border-radius:999px;padding:2px 9px}
+.card p{color:var(--ink2);font-size:14px;margin:6px 0 16px}
+.row{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;width:100%;text-align:left}
+.lbl{font-family:'Barlow Condensed';font-weight:800;font-style:italic;text-transform:uppercase;font-size:30px;line-height:1;letter-spacing:.02em}
+.sub{font-size:12px;font-weight:500;opacity:.8;margin-top:5px}
+.amt{font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* A · flat block */
+.a{min-height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-radius:12px;background:var(--up);color:var(--bg);border-bottom:3px solid var(--upd);transition:filter .12s,transform .1s}
+.a.red{background:var(--down);color:#fff;border-bottom-color:var(--downd)}
+.a:hover{filter:brightness(1.06)}.a:active{transform:translateY(2px);border-bottom-width:1px;filter:brightness(.95)}
+
+/* B · outline HUD */
+.b{min-height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-radius:12px;background:rgba(92,255,157,.07);color:var(--up);border:2px solid var(--up);box-shadow:0 0 24px rgba(92,255,157,.25),inset 0 0 24px rgba(92,255,157,.06);transition:background .15s,color .15s,box-shadow .15s,transform .1s}
+.b .amt{background:rgba(92,255,157,.15);padding:6px 10px;border-radius:8px}
+.b:hover{background:var(--up);color:var(--bg);box-shadow:0 0 40px rgba(92,255,157,.5)}.b:hover .amt{background:rgba(0,0,0,.18)}.b:active{transform:scale(.985)}
+.b.red{color:var(--down);border-color:var(--down);background:rgba(255,77,109,.08);box-shadow:0 0 24px rgba(255,77,109,.3),inset 0 0 24px rgba(255,77,109,.06);animation:pulse 1s ease-in-out infinite}
+.b.red .amt{background:rgba(255,77,109,.15)}.b.red:hover{background:var(--down);color:#fff}
+@keyframes pulse{50%{box-shadow:0 0 44px rgba(255,77,109,.55),inset 0 0 24px rgba(255,77,109,.1)}}
+
+/* C · split slab, chamfered */
+.c{min-height:78px;display:grid;grid-template-columns:1fr 130px;align-items:stretch;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);background:var(--up);color:var(--bg);transition:filter .12s,transform .1s}
+.c .l{display:flex;flex-direction:column;justify-content:center;padding:0 22px}
+.c .r{display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22);position:relative}
+.c .r::before{content:'';position:absolute;left:-10px;top:0;bottom:0;width:20px;background:var(--up);transform:skewX(-14deg)}
+.c.red{background:var(--down);color:#fff}.c.red .r::before{background:var(--down)}
+.c:hover{filter:brightness(1.06)}.c:active{transform:scale(.985)}
+
+/* D · chamfered HUD outline with fill sweep */
+.d{position:relative;min-height:78px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;color:var(--up);background:linear-gradient(180deg,#0f1a2c,#0a1020);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);isolation:isolate;transition:color .15s}
+.d::before{content:'';position:absolute;inset:0;background:var(--up);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);z-index:-2}
+.d::after{content:'';position:absolute;inset:2px;background:linear-gradient(180deg,#0f1a2c,#0a1020);clip-path:polygon(15px 0,100% 0,100% calc(100% - 15px),calc(100% - 15px) 100%,0 100%,0 15px);z-index:-1;transition:transform .2s cubic-bezier(.23,1,.32,1);transform-origin:right}
+.d:hover{color:var(--bg)}.d:hover::after{transform:scaleX(0)}.d:active{transform:scale(.985)}
+.d .amt{border:1px solid currentColor;padding:6px 10px;border-radius:6px}
+.d.red{color:var(--down)}.d.red::before{background:var(--down)}.d.red:hover{color:#fff}
+.d .tick{position:absolute;right:0;top:0;width:60px;height:3px;background:currentColor;opacity:.8}
+</style></head><body>
+<h1>BOARD / EJECT key options</h1>
+<p class="lead">Four treatments for the one button in the cockpit. Hover and press each. Left is the board state, right is the eject state.</p>
+<div class="grid">
+  <div class="card"><h2>A <span>Flat block</span></h2><p>Solid fill, dark text, a 3px darker base edge that compresses on press. No glow, no gradient. The most "product" of the four.</p>
+    <div class="row"><button class="a"><span><span class="lbl">Board</span><div class="sub">lifts off at 1.00x</div></span><span class="amt">0.01 ETH</span></button><button class="a red"><span><span class="lbl">Eject</span><div class="sub">cash out now</div></span><span class="amt">1.42x · +0.004</span></button></div></div>
+  <div class="card"><h2>B <span>Outline HUD</span></h2><p>Transparent with a glowing outline, fills solid on hover. Eject breathes. Feels like the HUD brackets in the sky.</p>
+    <div class="row"><button class="b"><span><span class="lbl">Board</span><div class="sub">lifts off at 1.00x</div></span><span class="amt">0.01 ETH</span></button><button class="b red"><span><span class="lbl">Eject</span><div class="sub">cash out now</div></span><span class="amt">1.42x · +0.004</span></button></div></div>
+  <div class="card"><h2>C <span>Split slab</span></h2><p>Chamfered corners, angled divider, the amount in its own darker bay. The most esports of the four.</p>
+    <div class="row"><button class="c"><span class="l"><span class="lbl">Board</span><div class="sub">lifts off at 1.00x</div></span><span class="r amt">0.01 ETH</span></button><button class="c red"><span class="l"><span class="lbl">Eject</span><div class="sub">cash out now</div></span><span class="r amt">1.42x</span></button></div></div>
+  <div class="card"><h2>D <span>Chamfered sweep</span></h2><p>Dark chamfered plate with a coloured edge; the fill sweeps in from the right on hover. Valorant / Apex style.</p>
+    <div class="row"><button class="d"><span class="tick"></span><span><span class="lbl">Board</span><div class="sub">lifts off at 1.00x</div></span><span class="amt">0.01 ETH</span></button><button class="d red"><span class="tick"></span><span><span class="lbl">Eject</span><div class="sub">cash out now</div></span><span class="amt">1.42x · +0.004</span></button></div></div>
+</div>
+</body></html>

@@ -22,7 +22,7 @@ import { TICKERS } from '../data/sample'
 import type { Account, YouState } from './engine'
 import { OPERATOR_WS, OPERATOR_HTTP } from './live/config'
 import { buyLive, cashOutLive, readBalanceEth, readRoundState } from './live/chain'
-import { getAddress } from './mode'
+import { getAddress, subscribeMode } from './mode'
 
 const MAX_PAYOUT_X = 25
 const EDGE_KEEP = 0.98
@@ -101,6 +101,10 @@ export class LiveEngine {
   private calledUntil = 0
   private curTickBuf: number[] = []
   private balanceTimer: number | null = null
+  /** Unsubscribe from the mode store, set up on first start(). */
+  private unsubMode: (() => void) | null = null
+  /** The account the chain state was last synced for. */
+  private syncedFor: string | null = null
   private reconnectDelay = 1000
   private stopped = true
 
@@ -122,6 +126,22 @@ export class LiveEngine {
     void this.loadResults()
     void this.syncChainEntry()
     this.balanceTimer = window.setInterval(() => void this.refreshBalance(), 12_000)
+    /* start() runs when the component tree first subscribes, which is
+     * before any wallet is connected: syncChainEntry() bails at the
+     * getAddress() guard and the max stake stays 0 until the operator
+     * happens to open a round. Re-sync whenever the account appears or
+     * changes, so a freshly connected player has the stake ceiling and
+     * any existing on-chain entry immediately. */
+    if (!this.unsubMode) {
+      this.unsubMode = subscribeMode(() => {
+        const addr = getAddress()
+        if (addr === this.syncedFor) return
+        this.syncedFor = addr
+        if (!addr) return
+        void this.refreshBalance()
+        void this.syncChainEntry()
+      })
+    }
   }
 
   stop(): void {
@@ -323,6 +343,12 @@ export class LiveEngine {
     if (!addr) return
     try {
       const st = await readRoundState(addr)
+      /* The max stake read here is the only one available until the
+       * operator's next round_open frame. Emitting only when an entry
+       * was adopted left the MAX control reading 0 ETH for the whole
+       * cooldown, so a freshly connected player saw no stake ceiling
+       * at all. The read itself changed state; announce it. */
+      const maxChanged = st.maxStakeEth !== this.maxStakeEth
       this.maxStakeEth = st.maxStakeEth
       if (st.entry && !st.entry.cashedOut && !st.entry.refunded && (st.phase === 'open' || st.phase === 'live')) {
         this.setRound(st.roundId)
@@ -333,6 +359,8 @@ export class LiveEngine {
           exitX: null,
           openedAtLabel: timeLabel(),
         }
+        this.emit()
+      } else if (maxChanged) {
         this.emit()
       }
     } catch { /* transient RPC */ }

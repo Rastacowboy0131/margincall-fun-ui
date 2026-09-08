@@ -9,18 +9,16 @@ import { ConnectSheet } from '../components/shell/ConnectSheet'
 import { ProfileSheet } from '../components/shell/ProfileSheet'
 import { goPaper } from '../lib/mode'
 
-/* ------------------------------------------------------------------ *
- * The shell. Routing, page title, and the two sheets the header can
- * open. Everything framework-specific in this product is in this file,
- * App.tsx and AppLink.tsx — three files, one folder.
- * ------------------------------------------------------------------ */
+/* The shell: routing, page title, the sheets the header can open, and
+ * the route transition. Everything framework-specific is in this file,
+ * App.tsx and AppLink.tsx. */
 
 const TITLES: Record<string, string> = {
-  '/': 'Margin Call — sell before the call',
-  '/me': 'Your positions — Margin Call',
-  '/board': 'Leaderboard — Margin Call',
-  '/rewards': 'Rewards — Margin Call',
-  '/fair': 'Provably fair — Margin Call',
+  '/': 'Margin Call. Eject before the call.',
+  '/me': 'Your flights. Margin Call',
+  '/board': 'Leaderboard. Margin Call',
+  '/rewards': 'Rewards. Margin Call',
+  '/fair': 'Provably fair. Margin Call',
 }
 
 export function AppShell() {
@@ -29,11 +27,6 @@ export function AppShell() {
 
   useEffect(() => {
     document.title = TITLES[pathname] ?? 'Margin Call'
-  }, [pathname])
-
-  // A route change should start the new page at the top, not halfway
-  // down where the last one was left.
-  useEffect(() => {
     window.scrollTo(0, 0)
   }, [pathname])
 
@@ -42,8 +35,6 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      {/* The tape is flavour. It costs 26px, which a phone cannot spare
-       * on the one screen where the game itself has to fit. */}
       <div className="hidden sm:block">
         <Tape />
       </div>
@@ -58,31 +49,19 @@ export function AppShell() {
         />
       </div>
 
-      <main className="flex-1">
+      {/* Keyed on the route so each page arrives rather than snaps. */}
+      <main key={pathname} className="anim-page flex-1">
         <Outlet />
       </main>
 
       <Footer variant={isTable ? 'full' : 'short'} />
 
-      {/* Reserves the fixed tab bar's height so the last element of every
-       * page stays reachable. Scroll to the bottom of each route when
-       * checking this — it is the classic bottom-nav bug. */}
-      <div
-        aria-hidden="true"
-        className="lg:hidden"
-        style={{ height: 'calc(58px + env(safe-area-inset-bottom))' }}
-      />
+      <div aria-hidden="true" className="lg:hidden" style={{ height: 'calc(56px + env(safe-area-inset-bottom))' }} />
 
       <TabBar pathname={pathname} />
 
-      <BalanceSheet
-        open={sheet === 'balance'}
-        onClose={close}
-        onGoLive={() => setSheet('connect')}
-      />
+      <BalanceSheet open={sheet === 'balance'} onClose={close} onGoLive={() => setSheet('connect')} />
       <ConnectSheet open={sheet === 'connect'} onClose={close} />
-      {/* Keyed by open so the sheet re-reads the saved profile each time
-       * it opens, instead of resurrecting a stale draft. */}
       {sheet === 'profile' && <ProfileSheet open onClose={close} />}
     </div>
   )

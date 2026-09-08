@@ -8,24 +8,14 @@ import { PageHead } from '../components/shell/PageHead'
 import { Panel } from '../components/ui/Panel'
 import { Stat } from '../components/ui/Stat'
 import { Tag } from '../components/ui/Tag'
-import { keyClasses } from '../components/ui/Key'
-import { TickerMark } from '../components/brand/TickerMark'
-import { Ticket } from '../components/table/Ticket'
+import { buttonClasses } from '../components/ui/Button'
+import { PositionCard } from '../components/table/PositionCard'
 import { Avatar } from '../components/brand/Avatar'
 import { ProfileSheet } from '../components/shell/ProfileSheet'
 import { displayName, useProfile } from '../lib/profile'
 import { cx } from '../lib/cx'
 
-/* ------------------------------------------------------------------ *
- * Me — your money and your log, which were two separate pages in the
- * old build for no reason anyone could name. A player checking their
- * balance and a player checking what they lost it on are the same
- * player, thirty seconds apart.
- *
- * The positions log reflows rather than shrinks: a seven-column table
- * at 360px is unreadable in either direction, so below sm each row
- * becomes a stacked card carrying the same seven values.
- * ------------------------------------------------------------------ */
+/* Me: your money and your log. Same player, thirty seconds apart. */
 
 function Outcome({ row }: { row: HistoryRow }) {
   return row.outcome === 'called' ? (
@@ -50,8 +40,6 @@ export function Me() {
     profile.discord && `@${profile.discord} on Discord`,
   ].filter(Boolean) as string[]
 
-  /* The open position, live from the engine. Null when flat — the empty
-   * branch below is a designed state, not a fallback. */
   const open: Position | null =
     you.status === 'in' && you.entryX !== null
       ? {
@@ -68,286 +56,188 @@ export function Me() {
       : null
 
   return (
-    <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:py-12">
+    <div className="mx-auto max-w-[1120px] px-4 py-8 sm:px-6 lg:py-12">
       <PageHead
-        first="THE"
-        second="DAMAGE"
+        title="Flight record"
         lead={
-          live ? (
-            <>
-              Live positions, real ETH, the same lessons. Settled on Robinhood Chain; this log
-              lives in your browser.
-            </>
-          ) : (
-            <>
-              Paper positions, paper P&amp;L, real lessons. Everything here lives in your browser
-              until {CHAIN.networkName} mainnet ships.
-            </>
-          )
+          live
+            ? 'Live positions, real ETH, the same lessons. Settled on Robinhood Chain; this log lives in your browser.'
+            : `Paper positions, paper P&L, real lessons. Everything here lives in your browser until ${CHAIN.networkName} mainnet ships.`
         }
         aside={
           <div className="flex items-center gap-2">
-            <Tag tone="gold">{live ? 'Live · on chain' : 'Paper trading'}</Tag>
-            <Tag tone="live">{session.streakDays}-day streak</Tag>
+            <Tag tone={live ? 'up' : 'quiet'}>{live ? 'Live, on chain' : 'Paper trading'}</Tag>
+            <Tag tone="quiet">{session.streakDays}-day streak</Tag>
           </div>
         }
       />
 
-      {/* ---- who this is ---- */}
-      <Panel className="mb-4" bodyClassName="p-4">
-        <div className="flex items-center gap-4">
-          <Avatar
-            handle={displayName(profile)}
-            tint="#ffc247"
-            size={56}
-            ring="gold"
-            pfp={profile.pfp || undefined}
-          />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="truncate text-lg font-extrabold tracking-tight text-ink">
-                {displayName(profile)}
-              </span>
-              <Tag tone="gold">{live ? 'Live' : 'Demo'}</Tag>
-            </div>
-            <p className="mt-0.5 truncate text-xs text-ink-3">
-              {socials.length > 0
-                ? socials.join(' · ')
-                : profile.name
-                  ? 'Stored in this browser. Shown at the table, in the feed and on the board.'
-                  : 'Set a name and pfp for your seat at the table.'}
-            </p>
+      <div className="flex items-center gap-4 border-y border-line py-4">
+        <Avatar handle={displayName(profile)} tint="#ffcf5a" size={44} pfp={profile.pfp || undefined} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="truncate text-base font-semibold tracking-tight text-ink">{displayName(profile)}</span>
+            <Tag tone="quiet">{live ? 'Live' : 'Demo'}</Tag>
           </div>
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className={`${keyClasses('ghost', 'md')} shrink-0`}
-          >
-            Edit profile
-          </button>
+          <p className="mt-0.5 truncate text-xs text-ink-3">
+            {socials.length > 0
+              ? socials.join(' / ')
+              : profile.name
+                ? 'Stored in this browser. Shown at the table, in the feed and on the board.'
+                : 'Set a name and picture for your seat at the table.'}
+          </p>
         </div>
-      </Panel>
+        <button type="button" onClick={() => setEditing(true)} className={`${buttonClasses('ghost', 'md')} shrink-0`}>
+          Edit profile
+        </button>
+      </div>
 
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-        {/* ---- the open position ---- */}
+      <div className="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Panel title="Open position" bodyClassName="p-0">
           {open === null ? (
             <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
-              <span aria-hidden="true" className="text-3xl">
-                🎟️
-              </span>
-              <p className="text-base font-bold text-ink">Nothing open</p>
+              <p className="text-base font-semibold text-ink">Not aboard</p>
               <p className="max-w-[36ch] text-sm text-ink-3">
-                Flat is a position too, just a boring one. Nothing prints out of the console until
-                you buy into a round.
+                You are on the ground. Nothing shows here until you board a flight.
               </p>
-              <AppLink to="/" className={`${keyClasses('cash', 'md')} mt-1`}>
-                Go to the table
+              <AppLink to="/" className={`${buttonClasses('go', 'md')} mt-1`}>
+                Go to the launch
               </AppLink>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-5 p-5 sm:flex-row sm:items-start">
-              <Ticket
-                position={open}
-                payoutX={open.payoutX}
-                pnlEth={open.pnlEth}
-                stamp="none"
-                className="shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <TickerMark ticker={open.ticker} size={30} />
-                  <span className="text-lg font-extrabold tracking-tight">
-                    {open.ticker.symbol}
-                  </span>
-                  <Tag tone="up">
-                    {open.leverage}x {open.side}
-                  </Tag>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-ink-2">
-                  You are holding {eth(open.stakeEth)} ETH into round #{open.roundId}, in at{' '}
-                  <span className="nums font-bold text-ink">{x(open.entryX)}</span>. Your payout is
-                  the sell price divided by that entry — not the round multiple — which right now
-                  is <span className="nums font-bold text-up">{x(open.payoutX)}</span>.
-                </p>
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <AppLink to="/" className={keyClasses('cash', 'md')}>
-                    Back to the table
-                  </AppLink>
-                  <span className="nums text-sm font-bold text-up">
-                    {signedEth(open.pnlEth, 4)} ETH unrealised
-                  </span>
-                </div>
+            <div className="flex flex-col gap-4 p-4">
+              <PositionCard position={open} payoutX={open.payoutX} pnlEth={open.pnlEth} stamp="none" />
+              <p className="text-sm leading-relaxed text-ink-2">
+                You are holding {eth(open.stakeEth)} ETH into round #{open.roundId}, in at{' '}
+                <span className="num font-medium text-ink">{x(open.entryX)}</span>. Your payout is the sell price divided
+                by that entry, not the round multiple, which right now is{' '}
+                <span className="num font-medium text-up">{x(open.payoutX)}</span>.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <AppLink to="/" className={buttonClasses('go', 'md')}>
+                  Back to the launch
+                </AppLink>
+                <span className="num text-sm font-medium text-up">{signedEth(open.pnlEth, 4)} ETH unrealised</span>
               </div>
             </div>
           )}
         </Panel>
 
-        {/* ---- the money ---- */}
         <Panel title={live ? 'Wallet balance' : 'Paper balance'} bodyClassName="p-0">
-          <dl className="divide-y divide-rim">
+          <dl className="divide-y divide-line">
             {[
               ['Buying power', `${eth(session.buyingPowerEth)} ETH`, 'text-ink'],
-              ['At risk (open position)', `${eth(session.atRiskEth)} ETH`, 'text-ink'],
-              [
-                'Session net P&L',
-                `${signedEth(session.netPnlEth, 4)} ETH`,
-                session.netPnlEth < 0 ? 'text-down' : 'text-up',
-              ],
+              ['At risk', `${eth(session.atRiskEth)} ETH`, 'text-ink'],
+              ['Session P&L', `${signedEth(session.netPnlEth, 4)} ETH`, session.netPnlEth < 0 ? 'text-down' : 'text-up'],
             ].map(([label, value, tone]) => (
               <div key={label} className="flex items-baseline justify-between gap-3 px-4 py-3">
                 <dt className="text-sm text-ink-2">{label}</dt>
-                <dd className={cx('nums text-sm font-bold', tone)}>{value}</dd>
+                <dd className={cx('num text-sm font-medium', tone)}>{value}</dd>
               </div>
             ))}
-            <div className="flex items-baseline justify-between gap-3 bg-void px-4 py-4">
-              <dt className="text-sm font-bold">Account value</dt>
-              <dd className="nums text-xl font-extrabold text-gold">
-                {eth(session.accountValueEth, 4)} ETH
-              </dd>
+            <div className="flex items-baseline justify-between gap-3 bg-surface-2 px-4 py-4">
+              <dt className="text-sm font-medium">Account value</dt>
+              <dd className="num text-lg font-semibold text-ink">{eth(session.accountValueEth, 4)} ETH</dd>
             </div>
           </dl>
         </Panel>
       </div>
 
-      {/* ---- session stats: one panel, internal dividers, one hero ---- */}
       <Panel title="This session" className="mt-4" bodyClassName="p-0">
-        <div className="grid grid-cols-2 divide-x divide-y divide-rim sm:grid-cols-3 lg:grid-cols-5">
-          <Stat
-            label="Net P&L"
-            value={`${signedEth(session.netPnlEth)}`}
-            note="ETH · the house is patient"
-            tone={session.netPnlEth < 0 ? 'down' : 'up'}
-            hero
-          />
+        <div className="grid grid-cols-2 divide-x divide-y divide-line sm:grid-cols-3 lg:grid-cols-5">
+          <Stat label="Net P&L" value={signedEth(session.netPnlEth)} note="ETH, the house is patient" tone={session.netPnlEth < 0 ? 'down' : 'up'} hero />
           <Stat label="Rounds played" value={session.roundsPlayed} note="positions opened" />
-          <Stat
-            label="Win rate"
-            value={session.winRatePct === null ? '—' : `${session.winRatePct.toFixed(1)}%`}
-            note="sold above your entry"
-          />
-          <Stat
-            label="Best exit"
-            value={session.bestExitX === null ? '—' : x(session.bestExitX)}
-            note="your best payout multiple"
-            tone="up"
-          />
-          <Stat
-            label="Worst liquidation"
-            value={session.worstCalledAtX === null ? '—' : x(session.worstCalledAtX)}
-            note="lowest rug you held into"
-            tone="down"
-          />
+          <Stat label="Win rate" value={session.winRatePct === null ? '0.0%' : `${session.winRatePct.toFixed(1)}%`} note="sold above your entry" />
+          <Stat label="Best exit" value={session.bestExitX === null ? '0.00x' : x(session.bestExitX)} note="your best payout multiple" tone="up" />
+          <Stat label="Worst liquidation" value={session.worstCalledAtX === null ? '0.00x' : x(session.worstCalledAtX)} note="lowest rug you held into" tone="down" />
         </div>
       </Panel>
 
-      {/* ---- the log ---- */}
       <Panel
-        title="Your positions"
+        title="Your flights"
         className="mt-4"
         bodyClassName="p-0"
-        count={<span className="nums text-xs font-bold text-ink-3">{HISTORY.length} shown</span>}
+        count={<span className="num text-xs text-ink-3">{HISTORY.length} shown</span>}
       >
-        {/* wide: a real table, numbers right-aligned so magnitudes compare */}
-        <div className="hidden sm:block">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-rim">
-                {['Round', 'Position', 'Entry', 'Exit', 'Rugged at', 'P&L', 'Outcome'].map((h, i) => (
-                  <th
-                    key={h || i}
-                    scope="col"
-                    className={cx(
-                      'eyebrow px-4 py-2.5 text-ink-3',
-                      i >= 2 && i <= 5 ? 'text-right' : 'text-left',
-                    )}
-                  >
-                    {/* The outcome column's heading is carried for
-                     * screen readers only — the tags underneath say it
-                     * plainly enough, and sr-only on the <th> itself
-                     * would take the cell out of the table's layout. */}
-                    {i === 6 ? <span className="sr-only">{h}</span> : h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-rim">
+        {HISTORY.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-ink-3">No settled positions yet. The log fills in as you play.</p>
+        ) : (
+          <>
+            <div className="hidden sm:block">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-line">
+                    {['Round', 'Position', 'Entry', 'Exit', 'Rugged at', 'P&L', 'Outcome'].map((h, i) => (
+                      <th key={h} scope="col" className={cx('label px-4 py-2.5 font-medium', i >= 2 && i <= 5 ? 'text-right' : 'text-left')}>
+                        {i === 6 ? <span className="sr-only">{h}</span> : h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {HISTORY.map((r) => (
+                    <tr key={r.roundId} className="transition-colors hover:bg-surface-2">
+                      <td className="num px-4 py-3 text-ink-3">#{r.roundId}</td>
+                      <td className="px-4 py-3">
+                        <span className="flex items-center gap-2">
+                          <span className="font-medium text-ink">{r.ticker}</span>
+                          <span className="num text-xs text-ink-3">
+                            {r.leverage}x {r.side}
+                          </span>
+                        </span>
+                      </td>
+                      <td className="num px-4 py-3 text-right text-ink-2">{x(r.entryX)}</td>
+                      <td className="num px-4 py-3 text-right text-ink-2">{r.exitX === null ? '' : x(r.exitX)}</td>
+                      <td className="num px-4 py-3 text-right text-ink-2">{x(r.ruggedAtX)}</td>
+                      <td className={cx('num px-4 py-3 text-right font-semibold', r.pnlEth < 0 ? 'text-down' : 'text-up')}>
+                        {signedEth(r.pnlEth, 3)}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Outcome row={r} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <ul className="divide-y divide-line sm:hidden">
               {HISTORY.map((r) => (
-                <tr key={r.roundId}>
-                  <td className="nums px-4 py-3 text-ink-3">#{r.roundId}</td>
-                  <td className="px-4 py-3">
+                <li key={r.roundId} className="flex flex-col gap-2 p-4">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="flex items-center gap-2">
-                      <span className="font-bold text-ink">{r.ticker}</span>
-                      <span className="nums text-xs text-ink-3">
+                      <span className="text-sm font-medium text-ink">{r.ticker}</span>
+                      <span className="num text-xs text-ink-3">
                         {r.leverage}x {r.side}
                       </span>
                     </span>
-                  </td>
-                  <td className="nums px-4 py-3 text-right text-ink-2">{x(r.entryX)}</td>
-                  <td className="nums px-4 py-3 text-right text-ink-2">
-                    {r.exitX === null ? '—' : x(r.exitX)}
-                  </td>
-                  <td className="nums px-4 py-3 text-right text-ink-2">{x(r.ruggedAtX)}</td>
-                  <td
-                    className={cx(
-                      'nums px-4 py-3 text-right font-extrabold',
-                      r.pnlEth < 0 ? 'text-down' : 'text-up',
-                    )}
-                  >
-                    {signedEth(r.pnlEth, 3)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
                     <Outcome row={r} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* phone: the same seven values, stacked */}
-        <ul className="divide-y divide-rim sm:hidden">
-          {HISTORY.map((r) => (
-            <li key={r.roundId} className="flex flex-col gap-2 p-4">
-              <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-ink">{r.ticker}</span>
-                  <span className="nums text-xs text-ink-3">
-                    {r.leverage}x {r.side}
+                  </div>
+                  <div className="flex items-end justify-between gap-3">
+                    <dl className="num flex gap-4 text-xs text-ink-3">
+                      {[
+                        ['Entry', x(r.entryX)],
+                        ['Exit', r.exitX === null ? 'none' : x(r.exitX)],
+                        ['Rugged', x(r.ruggedAtX)],
+                      ].map(([k, v]) => (
+                        <div key={k}>
+                          <dt className="label text-[9px]">{k}</dt>
+                          <dd className="text-ink-2">{v}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <span className={cx('num text-base font-semibold', r.pnlEth < 0 ? 'text-down' : 'text-up')}>
+                      {signedEth(r.pnlEth, 3)}
+                    </span>
+                  </div>
+                  <span className="num text-[11px] text-ink-3">
+                    #{r.roundId} / {r.timeLabel}
                   </span>
-                </span>
-                <Outcome row={r} />
-              </div>
-              <div className="flex items-end justify-between gap-3">
-                <dl className="nums flex gap-4 text-xs text-ink-3">
-                  <div>
-                    <dt className="text-[10px] uppercase tracking-wider">Entry</dt>
-                    <dd className="text-ink-2">{x(r.entryX)}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[10px] uppercase tracking-wider">Exit</dt>
-                    <dd className="text-ink-2">{r.exitX === null ? '—' : x(r.exitX)}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[10px] uppercase tracking-wider">Rugged</dt>
-                    <dd className="text-ink-2">{x(r.ruggedAtX)}</dd>
-                  </div>
-                </dl>
-                <span
-                  className={cx(
-                    'nums text-base font-extrabold',
-                    r.pnlEth < 0 ? 'text-down' : 'text-up',
-                  )}
-                >
-                  {signedEth(r.pnlEth, 3)}
-                </span>
-              </div>
-              <span className="nums text-[11px] text-ink-3">
-                #{r.roundId} · {r.timeLabel}
-              </span>
-            </li>
-          ))}
-        </ul>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </Panel>
 
       {editing && <ProfileSheet open onClose={() => setEditing(false)} />}

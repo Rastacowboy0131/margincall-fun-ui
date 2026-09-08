@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 72">
+  <defs>
+    <linearGradient id="hull" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f3f5f9"/><stop offset="1" stop-color="#c9d1dd"/></linearGradient>
+    <linearGradient id="tip" x1="0" x2="1"><stop offset="0" stop-color="#c4ccd6"/><stop offset=".5" stop-color="#a7b0bc"/><stop offset="1" stop-color="#7c8794"/></linearGradient>
+    <linearGradient id="red" x1="0" x2="1"><stop offset="0" stop-color="#ff5a63"/><stop offset=".5" stop-color="#e63946"/><stop offset="1" stop-color="#b3202d"/></linearGradient>
+    <linearGradient id="redv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5a63"/><stop offset="1" stop-color="#b3202d"/></linearGradient>
+    <linearGradient id="noz" x1="0" x2="1"><stop offset="0" stop-color="#9aa3ad"/><stop offset="1" stop-color="#5b6570"/></linearGradient>
+    <radialGradient id="glass" cx=".38" cy=".35" r=".75"><stop offset="0" stop-color="#c8f1ff"/><stop offset=".5" stop-color="#5cc4f2"/><stop offset="1" stop-color="#1d6fa8"/></radialGradient>
+  </defs>
+  <!-- side fins -->
+  <path d="M21 36 C13 41 9 50 10 60 L21 52 Z" fill="url(#red)" stroke="#8f1721" stroke-width="1"/>
+  <path d="M43 36 C51 41 55 50 54 60 L43 52 Z" fill="url(#red)" stroke="#8f1721" stroke-width="1"/>
+  <!-- nozzle -->
+  <path d="M25 55 L39 55 L41 61 L23 61 Z" fill="url(#noz)" stroke="#3f4852" stroke-width="1"/>
+  <!-- hull -->
+  <path d="M32 3 C41 12 44 24 44 38 L44 51 Q44 56 39 56 L25 56 Q20 56 20 51 L20 38 C20 24 23 12 32 3 Z" fill="url(#hull)" stroke="#8a94a2" stroke-width="1"/>
+  <!-- nose tip -->
+  <path d="M32 3 C36 7 38.6 11.5 39.9 16 L24.1 16 C25.4 11.5 28 7 32 3 Z" fill="url(#tip)" stroke="#6b7580" stroke-width="1"/>
+  <!-- red band -->
+  <path d="M24.1 16 L39.9 16 C40.9 19.4 41.6 22.5 41.9 25 L22.1 25 C22.4 22.5 23.1 19.4 24.1 16 Z" fill="url(#red)" stroke="#8f1721" stroke-width="1"/>
+  <!-- porthole -->
+  <circle cx="32" cy="35" r="7.2" fill="#f2b830" stroke="#b07a10" stroke-width="1"/>
+  <circle cx="32" cy="35" r="4.8" fill="url(#glass)" stroke="#1d4f78" stroke-width=".8"/>
+  <circle cx="30.3" cy="33.2" r="1.3" fill="#ffffff" opacity=".9"/>
+  <!-- front fin -->
+  <path d="M29 47 L32 66 L35 47 Z" fill="url(#redv)" stroke="#8f1721" stroke-width="1"/>
+  <!-- hull highlight -->
+  <path d="M27 14 C25 22 24.5 32 25 46" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>
+</svg>
