@@ -7,10 +7,14 @@ import { Icon } from '../ui/Icon'
 import { TickerMark } from '../brand/TickerMark'
 import { cx } from '../../lib/cx'
 
+/* Floor to two significant figures, then scrub binary-float noise so the
+ * result is the number a person would write. Without the round-trip,
+ * 0.000236246 * 0.25 lands as 0.000059999999999999995 and that string ends
+ * up printed on a preset chip. */
 export function floorSig(v: number): number {
   if (v <= 0) return 0
   const mag = Math.pow(10, Math.floor(Math.log10(v)) - 1)
-  return Math.floor(v / mag) * mag
+  return Number((Math.floor(v / mag) * mag).toPrecision(6))
 }
 
 /* ------------------------------------------------------------------ *
@@ -34,12 +38,28 @@ export function OrderPanel({
   position: Position | null; payoutX: number | null; pnlEth: number | null; queued: boolean; cashed: boolean; canBuy: boolean; onBuy: () => void; onCashOut: () => void
   live?: boolean; liveMaxStakeEth?: number; leverage: number; buyingPowerEth: number
 }) {
+  /* Why the buy button is off, in the order a player would ask. "More than
+   * your buying power" used to be the answer to every case, including the
+   * common one where the amount was fine and the betting window had simply
+   * closed. */
   const uid = useId()
   const frozen = phase === 'called', queueing = phase === 'intermission'
   const holding = position !== null && !cashed
   const canAct = !frozen && !queued && canBuy
 
   const presets: readonly number[] = live ? (liveMaxStakeEth > 0 ? [0.25, 0.5, 0.75, 1].map((f) => floorSig(liveMaxStakeEth * f)) : []) : STAKE_CHIPS_ETH
+  const overBalance = stakeEth > buyingPowerEth
+  const overTableMax = live && liveMaxStakeEth > 0 && stakeEth > liveMaxStakeEth
+  const windowShut = live && phase === 'live'
+  const blockedWhy = frozen
+    ? 'Round over. The next one opens in a moment.'
+    : overBalance
+      ? 'Amount is more than your wallet balance.'
+      : overTableMax
+        ? `Table max this round is ${fmtStake(liveMaxStakeEth)} ETH.`
+        : windowShut
+          ? 'Round is running. Your buy lands in the next window.'
+          : 'Amount is more than your buying power.'
   const maxStake = live ? liveMaxStakeEth : CHAIN.maxStakeEth
   const maxFor = () => (maxStake > 0 ? maxStake : Infinity)
 
@@ -103,7 +123,7 @@ export function OrderPanel({
                 <span className="label">ETH</span>
               </div>
               <Segmented ariaLabel="Amount presets" size="sm" className="mt-2" value={presets.includes(stakeEth) ? stakeEth : stakeEth === maxStake ? maxStake : null} onChange={onStake}
-                items={[...presets.map((v) => ({ value: v, label: String(v), name: `Stake ${v} ETH` })), { value: maxStake, label: 'MAX', name: `Stake the maximum` }]} />
+                items={[...presets.map((v) => ({ value: v, label: fmtStake(v), name: `Stake ${fmtStake(v)} ETH` })), { value: maxStake, label: 'MAX', name: `Stake the maximum` }]} />
             </div>
 
             <div>
@@ -134,7 +154,7 @@ export function OrderPanel({
               <span className="text-2xs font-medium">coming soon</span>
             </button>
             <p className="num flex items-center justify-between text-2xs text-ink-3">
-              <span>{frozen ? 'Round over. The next one opens in a moment.' : !canBuy ? 'Amount is more than your buying power.' : queueing ? 'Buys placed now fill at the open.' : 'Buy any time mid-round. Your entry becomes your 1.00x.'}</span>
+              <span>{frozen || !canBuy ? blockedWhy : queueing ? 'Buys placed now fill at the open.' : 'Buy any time mid-round. Your entry becomes your 1.00x.'}</span>
               <span>Max win <b className="text-ink-2">{fmtStake(maxWin)} ETH</b></span>
             </p>
           </div>
